@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>TO-DO List </h1>
+    <form id="taskForm">
+        <label for="taskName">Task Name</label>
+        <input type="text" id="taskName" required>
+
+        <label for="dueDate">Due Date :</label>
+        <input type="date" id="dueDate" required>
+
+        <label for="priority"> Priority</label>
+        <select id="priority" required>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </select>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <label for="filterCategory">Filter by category</label>
+    <select id="filterCategory">
+        <option value="All">All</option>
+        <option value=""></option>
+    </select>
+
+    <ul id="taskList"></ul>
+
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>
