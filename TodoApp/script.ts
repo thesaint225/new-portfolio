@@ -6,6 +6,7 @@ interface Task {
   dueDate: string;
   priority: "Low" | "Medium" | "High";
   completed: boolean;
+  category: "Work" | "Personal" | "Groceries";
 }
 
 let tasks: Task[] = []; //array to store task objects
@@ -15,7 +16,8 @@ let tasks: Task[] = []; //array to store task objects
 function addTask(
   name: string,
   dueDate: string,
-  priority: "Low" | "Medium" | "High"
+  priority: "Low" | "Medium" | "High",
+  category: "Work" | "Personal" | "Groceries"
 ) {
   // create a new task
   const newTask: Task = {
@@ -23,6 +25,7 @@ function addTask(
     dueDate,
     priority,
     completed: false,
+    category,
   };
 
   // validate the task before pushing
@@ -35,11 +38,15 @@ function addTask(
 
   // display  the task in task list (ul )
   const li = document.createElement("li");
-  li.textContent = `${newTask.name}(DueDate:${newTask.dueDate}) [priority:${newTask.priority}]`;
+  li.textContent = `${newTask.name}(DueDate:${newTask.dueDate}) [priority:${newTask.priority}] [Category:${newTask.category}]`;
   if (taskList) {
     taskList.appendChild(li);
   }
 }
+
+// implement Filtering by category
+
+function filterTaskByCategories() {}
 
 // adding the event listener for form submission
 
@@ -55,62 +62,21 @@ taskForm?.addEventListener("submit", function (e) {
   const priorityElement: HTMLSelectElement | null =
     document.querySelector("#priority");
 
+  const categoryElement: HTMLSelectElement | null =
+    document.querySelector("#category");
+
   // ensure element exist before accessing .value
-  if (taskNameElement && dueDateElement && priorityElement) {
+  if (taskNameElement && dueDateElement && priorityElement && categoryElement) {
     // Access the value of each element separately
     const taskName = taskNameElement.value.trim();
     const dueDate = dueDateElement.value;
     const priority = priorityElement.value as "Low" | "Medium" | "High";
+    const category = categoryElement.value as "Work" | "Personal" | "Groceries";
 
     // Call the addTask function to handle the task creation
-    addTask(taskName, dueDate, priority);
+    addTask(taskName, dueDate, priority, category);
 
     // Clear the form (reset all input fields)
     taskForm.reset();
   }
 });
-
-// taskForm?.addEventListener("submit", function (e) {
-//   e.preventDefault(); //to prevent form from submitting normally
-
-//   //   Get  Form elements using querySelector
-
-//   const taskNameElement: HTMLInputElement | null =
-//     document.querySelector("#taskName");
-
-//   const dueDateElement: HTMLInputElement | null =
-//     document.querySelector("#dueDate");
-
-//   const priorityElement: HTMLSelectElement | null =
-//     document.querySelector("#priority");
-
-//   // ensure element exist before accessing .value
-//   if (taskNameElement && dueDateElement && priorityElement) {
-//     // Access the value of each element separately
-//     const taskName = taskNameElement.value.trim();
-//     const dueDate = dueDateElement.value;
-//     const priority = priorityElement.value;
-
-//     // create a new  task
-
-//     const newTask = {
-//       name: taskName,
-//       dueDate: dueDate,
-//       priority: priority as "Low" | "Medium" | "High",
-//       completed: false,
-//     };
-
-//     // Add the task to array
-
-//     tasks.push(newTask);
-
-//     // display the task in the taskList (ul)
-//     const li = document.createElement("li");
-//     li.textContent = `${newTask.name} (Due:${newTask.dueDate}) [Priority : ${newTask.priority}]`;
-//     if (taskList) {
-//       taskList.appendChild(li);
-//     }
-//     // clear the form (reset all input fields)
-//     taskForm.reset();
-//   }
-// });

@@ -22,14 +22,19 @@
             <option value="Medium">Medium</option>
             <option value="High">High</option>
         </select>
+
+        <!-- Category selection -->
+        <label for="category">Category</label>
+        <select id="category" required>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Groceries">Groceries</option>
+        </select>
+
         <button type="submit">Add Task</button>
     </form>
 
-    <label for="filterCategory">Filter by category</label>
-    <select id="filterCategory">
-        <option value="All">All</option>
-        <option value=""></option>
-    </select>
+
 
     <ul id="taskList"></ul>
 
