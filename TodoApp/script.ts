@@ -20,9 +20,41 @@ function displayTasks(taskArray: Task[]) {
     taskList.innerHTML = "";
 
     // Add tasks to the list
-    taskArray.forEach((task) => {
+    taskArray.forEach((task, index) => {
       const li = document.createElement("li");
-      li.textContent = `${task.name} (Due: ${task.dueDate}) [Priority: ${task.priority}] [Category: ${task.category}]`;
+      // if task is completed  , apply strikethrough
+      li.innerHTML = task.completed
+        ? `<s>${task.name} (Due: ${task.dueDate}) [Priority: ${task.priority}] [Category: ${task.category}]</s>`
+        : `${task.name} (Due: ${task.dueDate}) [Priority: ${task.priority}] [Category: ${task.category}]`;
+
+      // create complete button
+      const completeBtn = document.createElement("button");
+      completeBtn.textContent = task.completed ? "undo" : "complete";
+
+      completeBtn.addEventListener("click", () => {
+        // Toggle  complete status
+        tasks[index].completed = !tasks[index].completed;
+        displayTasks(tasks);
+      });
+
+      // create "Delete" button
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Delete";
+
+      deleteBtn.addEventListener("click", () => {
+        //remove Task
+        tasks.splice(index, 1);
+        // refresh the array
+        displayTasks(tasks);
+      });
+
+      // append buttons to the list items
+      li.appendChild(completeBtn);
+      li.appendChild(deleteBtn);
+
+      // append task to the task list
+
       taskList.appendChild(li);
     });
   }
