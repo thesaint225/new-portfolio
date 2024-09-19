@@ -1,15 +1,32 @@
 const taskForm: HTMLFormElement | null = document.querySelector("#taskForm");
 const taskList: HTMLUListElement | null = document.querySelector("#taskList");
+const filterCategoryElement: HTMLSelectElement | null =
+  document.querySelector("#filterCategory");
 
 interface Task {
   name: string;
   dueDate: string;
   priority: "Low" | "Medium" | "High";
   completed: boolean;
-  category: "Work" | "Personal" | "Groceries";
+  category: "Work" | "Personal" | "Groceries" | "All";
 }
 
 let tasks: Task[] = []; //array to store task objects
+
+// Function to display tasks in the task list
+function displayTasks(taskArray: Task[]) {
+  if (taskList) {
+    // Clear the list
+    taskList.innerHTML = "";
+
+    // Add tasks to the list
+    taskArray.forEach((task) => {
+      const li = document.createElement("li");
+      li.textContent = `${task.name} (Due: ${task.dueDate}) [Priority: ${task.priority}] [Category: ${task.category}]`;
+      taskList.appendChild(li);
+    });
+  }
+}
 
 // function to create a new task and add it to the task list
 
@@ -17,7 +34,7 @@ function addTask(
   name: string,
   dueDate: string,
   priority: "Low" | "Medium" | "High",
-  category: "Work" | "Personal" | "Groceries"
+  category: "Work" | "Personal" | "Groceries" | "All"
 ) {
   // create a new task
   const newTask: Task = {
@@ -36,17 +53,24 @@ function addTask(
   // Add the task to the array
   tasks.push(newTask);
 
-  // display  the task in task list (ul )
-  const li = document.createElement("li");
-  li.textContent = `${newTask.name}(DueDate:${newTask.dueDate}) [priority:${newTask.priority}] [Category:${newTask.category}]`;
-  if (taskList) {
-    taskList.appendChild(li);
-  }
+  // display the updated task
+  displayTasks(tasks);
 }
 
 // implement Filtering by category
 
-function filterTaskByCategories() {}
+function filterTaskByCategories(
+  category: "Work" | "Personal" | "Groceries" | "All"
+) {
+  if (category === "All") {
+    // shows all the tasks if if "All" is selected is selected
+    displayTasks(tasks);
+  } else {
+    // Filter tasks by the selected category
+    const filteredTasks = tasks.filter((task) => task.category === category);
+    displayTasks(filteredTasks); // Display the filtered tasks
+  }
+}
 
 // adding the event listener for form submission
 
@@ -79,4 +103,15 @@ taskForm?.addEventListener("submit", function (e) {
     // Clear the form (reset all input fields)
     taskForm.reset();
   }
+});
+
+// Add an event listener for filtering tasks by category
+
+filterCategoryElement?.addEventListener("change", function () {
+  const selectedCategory = filterCategoryElement.value as
+    | "Work"
+    | "Personal"
+    | "Groceries"
+    | "All";
+  filterTaskByCategories(selectedCategory);
 });
