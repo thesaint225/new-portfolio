@@ -1,7 +1,34 @@
 var taskForm = document.querySelector("#taskForm");
 var taskList = document.querySelector("#taskList");
 var filterCategoryElement = document.querySelector("#filterCategory");
+var sortTasksElement = document.querySelector("#sortTasks");
+var priorityOrder = {
+    Low: 1,
+    Medium: 2,
+    High: 3,
+};
 var tasks = []; //array to store task objects
+// function sorting tasks by specified criterion
+function sortTasksByPriority(criterion) {
+    if (criterion === "priority") {
+        tasks.sort(function (a, b) {
+            var priorityOrder = {
+                Low: 1,
+                Medium: 2,
+                High: 3,
+            };
+            return priorityOrder[b.priority] - priorityOrder[a.priority];
+        });
+    }
+    else if (criterion === "dueDate") {
+        tasks.sort(function (a, b) { return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(); });
+    }
+    else if (criterion === "complete") {
+        tasks.sort(function (a, b) {
+            return a.completed === b.completed ? 0 : a.completed ? 1 : -1;
+        });
+    }
+}
 // Function to display tasks in the task list
 function displayTasks(taskArray) {
     if (taskList) {
@@ -12,8 +39,10 @@ function displayTasks(taskArray) {
             var li = document.createElement("li");
             // if task is completed  , apply strikethrough
             li.innerHTML = task.completed
-                ? "<s>".concat(task.name, " (Due: ").concat(task.dueDate, ") [Priority: ").concat(task.priority, "] [Category: ").concat(task.category, "]</s>")
-                : "".concat(task.name, " (Due: ").concat(task.dueDate, ") [Priority: ").concat(task.priority, "] [Category: ").concat(task.category, "]");
+                ? "<s><strong>".concat(task.name, "</strong> <span>(Due: ").concat(task.dueDate, ")</span> <span>[Priority: ").concat(task.priority, "]</span> <span>[Category: ").concat(task.category, "]</span></s>")
+                : "<strong>".concat(task.name, "</strong> <span>(Due: ").concat(task.dueDate, ")</span> <span>[Priority: ").concat(task.priority, "]</span> <span>[Category: ").concat(task.category, "]</span>");
+            // Don't forget to add the priority class
+            li.classList.add("priority-".concat(task.priority));
             // create complete button
             var completeBtn = document.createElement("button");
             completeBtn.textContent = task.completed ? "undo" : "complete";
@@ -56,6 +85,9 @@ function addTask(name, dueDate, priority, category) {
     }
     // Add the task to the array
     tasks.push(newTask);
+    // Apply sorting if any
+    var sortCriterion = sortTasksElement === null || sortTasksElement === void 0 ? void 0 : sortTasksElement.value;
+    sortTasksByPriority(sortCriterion);
     // display the updated task
     displayTasks(tasks);
 }
@@ -96,4 +128,9 @@ taskForm === null || taskForm === void 0 ? void 0 : taskForm.addEventListener("s
 filterCategoryElement === null || filterCategoryElement === void 0 ? void 0 : filterCategoryElement.addEventListener("change", function () {
     var selectedCategory = filterCategoryElement.value;
     filterTaskByCategories(selectedCategory);
+});
+sortTasksElement === null || sortTasksElement === void 0 ? void 0 : sortTasksElement.addEventListener("change", function () {
+    var selectedSort = sortTasksElement.value;
+    sortTasksByPriority(selectedSort);
+    displayTasks(tasks);
 });

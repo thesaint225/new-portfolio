@@ -2,6 +2,8 @@ const taskForm: HTMLFormElement | null = document.querySelector("#taskForm");
 const taskList: HTMLUListElement | null = document.querySelector("#taskList");
 const filterCategoryElement: HTMLSelectElement | null =
   document.querySelector("#filterCategory");
+const sortTasksElement: HTMLSelectElement | null =
+  document.querySelector("#sortTasks");
 
 interface Task {
   name: string;
@@ -11,7 +13,41 @@ interface Task {
   category: "Work" | "Personal" | "Groceries" | "All";
 }
 
+type PriorityOrder = {
+  Low: number;
+  Medium: number;
+  High: number;
+};
+
+const priorityOrder: PriorityOrder = {
+  Low: 1,
+  Medium: 2,
+  High: 3,
+};
+
 let tasks: Task[] = []; //array to store task objects
+
+// function sorting tasks by specified criterion
+function sortTasksByPriority(criterion: "priority" | "dueDate" | "complete") {
+  if (criterion === "priority") {
+    tasks.sort((a, b) => {
+      const priorityOrder: { [key: string]: number } = {
+        Low: 1,
+        Medium: 2,
+        High: 3,
+      };
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    });
+  } else if (criterion === "dueDate") {
+    tasks.sort(
+      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+    );
+  } else if (criterion === "complete") {
+    tasks.sort((a, b) =>
+      a.completed === b.completed ? 0 : a.completed ? 1 : -1
+    );
+  }
+}
 
 // Function to display tasks in the task list
 function displayTasks(taskArray: Task[]) {
@@ -24,9 +60,11 @@ function displayTasks(taskArray: Task[]) {
       const li = document.createElement("li");
       // if task is completed  , apply strikethrough
       li.innerHTML = task.completed
-        ? `<s>${task.name} (Due: ${task.dueDate}) [Priority: ${task.priority}] [Category: ${task.category}]</s>`
-        : `${task.name} (Due: ${task.dueDate}) [Priority: ${task.priority}] [Category: ${task.category}]`;
+        ? `<s><strong>${task.name}</strong> <span>(Due: ${task.dueDate})</span> <span>[Priority: ${task.priority}]</span> <span>[Category: ${task.category}]</span></s>`
+        : `<strong>${task.name}</strong> <span>(Due: ${task.dueDate})</span> <span>[Priority: ${task.priority}]</span> <span>[Category: ${task.category}]</span>`;
 
+      // Don't forget to add the priority class
+      li.classList.add(`priority-${task.priority}`);
       // create complete button
       const completeBtn = document.createElement("button");
       completeBtn.textContent = task.completed ? "undo" : "complete";
@@ -84,6 +122,14 @@ function addTask(
   }
   // Add the task to the array
   tasks.push(newTask);
+
+  // Apply sorting if any
+  const sortCriterion = sortTasksElement?.value as
+    | "priority"
+    | "dueDate"
+    | "complete";
+
+  sortTasksByPriority(sortCriterion);
 
   // display the updated task
   displayTasks(tasks);
@@ -146,4 +192,14 @@ filterCategoryElement?.addEventListener("change", function () {
     | "Groceries"
     | "All";
   filterTaskByCategories(selectedCategory);
+});
+
+sortTasksElement?.addEventListener("change", function () {
+  const selectedSort = sortTasksElement.value as
+    | "priority"
+    | "dueDate"
+    | "complete";
+
+  sortTasksByPriority(selectedSort);
+  displayTasks(tasks);
 });
