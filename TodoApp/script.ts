@@ -69,9 +69,13 @@ function displayTasks(taskArray: Task[]) {
       const completeBtn = document.createElement("button");
       completeBtn.textContent = task.completed ? "undo" : "complete";
 
+      // Disable the "Complete" button if the task is completed
+      completeBtn.disabled = task.completed;
+
       completeBtn.addEventListener("click", () => {
         // Toggle  complete status
         tasks[index].completed = !tasks[index].completed;
+
         displayTasks(tasks);
       });
 
@@ -114,6 +118,8 @@ function addTask(
     completed: false,
     category,
   };
+
+  // customer property
 
   // validate the task before pushing
   if (newTask.name.length === 0 || newTask.dueDate === "") {
@@ -203,3 +209,39 @@ sortTasksElement?.addEventListener("change", function () {
   sortTasksByPriority(selectedSort);
   displayTasks(tasks);
 });
+
+// toggle theme
+const button: HTMLElement | null = document.getElementById("toggleTheme");
+
+// function to toggle theme
+
+function toggleTheme() {
+  const body: HTMLBodyElement | null = document.querySelector("body");
+
+  if (body?.classList.contains("dark-mode")) {
+    // switch to light-light
+    body.classList.remove("dark-mode");
+    body.classList.add("light-mode");
+
+    localStorage.setItem("theme", "light-mode");
+  } else {
+    // switch to dark-mode
+    body?.classList.add("dark-mode");
+    body?.classList.remove("light-mode");
+
+    localStorage.setItem("theme", "dark-mode");
+  }
+}
+
+// add an event listener
+button?.addEventListener("click", toggleTheme);
+
+// on page load  , check for saved theme  and apply
+
+window.onload = function () {
+  const savedTheme: string | null = localStorage.getItem("theme");
+  const body: HTMLBodyElement | null = document.querySelector("body");
+  if (savedTheme && body) {
+    body.classList.add(savedTheme);
+  }
+};

@@ -46,6 +46,8 @@ function displayTasks(taskArray) {
             // create complete button
             var completeBtn = document.createElement("button");
             completeBtn.textContent = task.completed ? "undo" : "complete";
+            // Disable the "Complete" button if the task is completed
+            completeBtn.disabled = task.completed;
             completeBtn.addEventListener("click", function () {
                 // Toggle  complete status
                 tasks[index].completed = !tasks[index].completed;
@@ -78,6 +80,7 @@ function addTask(name, dueDate, priority, category) {
         completed: false,
         category: category,
     };
+    // customer property
     // validate the task before pushing
     if (newTask.name.length === 0 || newTask.dueDate === "") {
         alert("task name and due date cannot be empty!");
@@ -134,3 +137,31 @@ sortTasksElement === null || sortTasksElement === void 0 ? void 0 : sortTasksEle
     sortTasksByPriority(selectedSort);
     displayTasks(tasks);
 });
+// toggle theme
+var button = document.getElementById("toggleTheme");
+// function to toggle theme
+function toggleTheme() {
+    var body = document.querySelector("body");
+    if (body === null || body === void 0 ? void 0 : body.classList.contains("dark-mode")) {
+        // switch to light-light
+        body.classList.remove("dark-mode");
+        body.classList.add("light-mode");
+        localStorage.setItem("theme", "light-mode");
+    }
+    else {
+        // switch to dark-mode
+        body === null || body === void 0 ? void 0 : body.classList.add("dark-mode");
+        body === null || body === void 0 ? void 0 : body.classList.remove("light-mode");
+        localStorage.setItem("theme", "dark-mode");
+    }
+}
+// add an event listener
+button === null || button === void 0 ? void 0 : button.addEventListener("click", toggleTheme);
+// on page load  , check for saved theme  and apply
+window.onload = function () {
+    var savedTheme = localStorage.getItem("theme");
+    var body = document.querySelector("body");
+    if (savedTheme && body) {
+        body.classList.add(savedTheme);
+    }
+};

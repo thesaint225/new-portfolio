@@ -8,6 +8,15 @@ body {
     background-color: #f4f4f4;
 }
 
+.dark-mode {
+  background-color: #333;
+  color: #fff;
+}
+.light-mode {
+  background-color: #fff;
+  color: #000;
+}
+
 h1 {
     text-align: center;
     color: #2c3e50;
