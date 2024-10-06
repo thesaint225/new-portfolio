@@ -107,40 +107,47 @@ if (productGridElement) {
     // check if productCard exists before proceeding
     if (productCard) {
       // Add  event listener for + button
-      const PlusButton: HTMLButtonElement | null =
-        productCard?.querySelector(".plus");
+      const plusButton: HTMLButtonElement | null =
+        productCard.querySelector(".plus");
       const minusButton: HTMLButtonElement | null =
-        productCard?.querySelector(".minus");
+        productCard.querySelector(".minus");
+      const quantityInput: HTMLInputElement | null =
+        productCard.querySelector(".quantity-input");
 
-      if (PlusButton) {
-        PlusButton.addEventListener("click", function () {
-          const quantityInput: HTMLInputElement | null =
-            productCard.querySelector(".quantity-input");
-          // check if quantityInput exist
-          if (quantityInput) {
-            const currentQuantity = parseInt(quantityInput.value);
-
-            if (currentQuantity < product.availability) {
-              // increase Quantity  and ensure  it is converted to string
-              quantityInput.value = (currentQuantity + 1).toString();
-            }
+      if (plusButton && minusButton && quantityInput) {
+        plusButton.addEventListener("click", function () {
+          let currentQuantity = parseInt(quantityInput.value);
+          if (currentQuantity < product.availability) {
+            quantityInput.value = (currentQuantity + 1).toString();
           }
-        });
-      }
 
-      //   add event  listener for - button
-
-      if (minusButton) {
-        minusButton.addEventListener("click", function () {
-          const quantityInput: HTMLInputElement | null =
-            productCard.querySelector(".quantity-input");
-          if (quantityInput) {
+          minusButton.addEventListener("click", function () {
             const currentQuantity = parseInt(quantityInput.value);
-            //   ensure that quantity do not go bellow 1
             if (currentQuantity > 1) {
               quantityInput.value = (currentQuantity - 1).toString();
             }
-          }
+          });
+
+          //  Add event listener  for direct input
+          quantityInput.addEventListener("input", function () {
+            let value = parseInt(this.value);
+            if (isNaN(value) || value < 1) {
+              this.value = "1";
+            } else if (value > product.availability) {
+              this.value = product.availability.toString();
+            }
+          });
+
+          // Prevent invalid characters like '-' or 'e' and combinations with Shift key
+          quantityInput.addEventListener("keydown", function (e) {
+            const invalidKeys = ["-", "e", "+", "."];
+            if (
+              invalidKeys.includes(e.key) ||
+              (e.shiftKey && ["+", "-"].includes(e.key))
+            ) {
+              e.preventDefault();
+            }
+          });
         });
       }
     }

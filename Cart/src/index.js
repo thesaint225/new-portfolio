@@ -67,32 +67,39 @@ if (productGridElement) {
         // check if productCard exists before proceeding
         if (productCard) {
             // Add  event listener for + button
-            var PlusButton = productCard === null || productCard === void 0 ? void 0 : productCard.querySelector(".plus");
-            var minusButton = productCard === null || productCard === void 0 ? void 0 : productCard.querySelector(".minus");
-            if (PlusButton) {
-                PlusButton.addEventListener("click", function () {
-                    var quantityInput = productCard.querySelector(".quantity-input");
-                    // check if quantityInput exist
-                    if (quantityInput) {
-                        var currentQuantity = parseInt(quantityInput.value);
-                        if (currentQuantity < product.availability) {
-                            // increase Quantity  and ensure  it is converted to string
-                            quantityInput.value = (currentQuantity + 1).toString();
-                        }
+            var plusButton = productCard.querySelector(".plus");
+            var minusButton_1 = productCard.querySelector(".minus");
+            var quantityInput_1 = productCard.querySelector(".quantity-input");
+            if (plusButton && minusButton_1 && quantityInput_1) {
+                plusButton.addEventListener("click", function () {
+                    var currentQuantity = parseInt(quantityInput_1.value);
+                    if (currentQuantity < product.availability) {
+                        quantityInput_1.value = (currentQuantity + 1).toString();
                     }
-                });
-            }
-            //   add event  listener for - button
-            if (minusButton) {
-                minusButton.addEventListener("click", function () {
-                    var quantityInput = productCard.querySelector(".quantity-input");
-                    if (quantityInput) {
-                        var currentQuantity = parseInt(quantityInput.value);
-                        //   ensure that quantity do not go bellow 1
+                    minusButton_1.addEventListener("click", function () {
+                        var currentQuantity = parseInt(quantityInput_1.value);
                         if (currentQuantity > 1) {
-                            quantityInput.value = (currentQuantity - 1).toString();
+                            quantityInput_1.value = (currentQuantity - 1).toString();
                         }
-                    }
+                    });
+                    //  Add event listener  for direct input
+                    quantityInput_1.addEventListener("input", function () {
+                        var value = parseInt(this.value);
+                        if (isNaN(value) || value < 1) {
+                            this.value = "1";
+                        }
+                        else if (value > product.availability) {
+                            this.value = product.availability.toString();
+                        }
+                    });
+                    // Prevent invalid characters like '-' or 'e' and combinations with Shift key
+                    quantityInput_1.addEventListener("keydown", function (e) {
+                        var invalidKeys = ["-", "e", "+", "."];
+                        if (invalidKeys.includes(e.key) ||
+                            (e.shiftKey && ["+", "-"].includes(e.key))) {
+                            e.preventDefault();
+                        }
+                    });
                 });
             }
         }
