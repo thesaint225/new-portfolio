@@ -115,7 +115,7 @@ if (productGridElement) {
         productCard.querySelector(".minus");
       const quantityInput: HTMLInputElement | null =
         productCard.querySelector(".quantity-input");
-      const availabilityElement: HTMLElement | null = document.querySelector(
+      const availabilityElement: HTMLElement | null = productCard.querySelector(
         ".availability-value"
       );
 
@@ -124,8 +124,7 @@ if (productGridElement) {
       let availabilityStock = product.availability;
 
       function updateAvailability(newQuantity: number) {
-        const remainingStock =
-          availabilityStock - newQuantity + currentQuantity;
+        const remainingStock = availabilityStock - newQuantity;
         currentQuantity = newQuantity;
 
         if (availabilityElement) {
@@ -153,6 +152,7 @@ if (productGridElement) {
       }
 
       if (plusButton && minusButton && quantityInput) {
+        // Event listener for the plus button
         plusButton.addEventListener("click", function () {
           let currentQuantity = parseInt(quantityInput.value);
 
@@ -161,45 +161,45 @@ if (productGridElement) {
             quantityInput.value = newQuantity.toString();
             updateAvailability(newQuantity);
           }
-
-          minusButton.addEventListener("click", function () {
-            const currentQuantity = parseInt(quantityInput.value);
-            if (currentQuantity > 1) {
-              const newQuantity = currentQuantity - 1;
-              quantityInput.value = newQuantity.toString();
-              updateAvailability(newQuantity);
-            }
-          });
-
-          //   handle  direct input  changes
-
-          quantityInput.addEventListener("input", function () {
-            let inputValue = parseInt(quantityInput.value);
-
-            if (isNaN(inputValue) || inputValue < 1) {
-              quantityInput.value = "1";
-              updateAvailability(1);
-            } else if (inputValue > availabilityStock) {
-              inputValue = availabilityStock;
-              quantityInput.value = inputValue.toString();
-            } else {
-              updateAvailability(inputValue);
-            }
-          });
-
-          //
-
-          // Prevent invalid characters like '-' or 'e' and combinations with Shift key
-          quantityInput.addEventListener("keydown", function (e) {
-            const invalidKeys = ["-", "e", "+", "."];
-            if (
-              invalidKeys.includes(e.key) ||
-              (e.shiftKey && ["+", "-"].includes(e.key))
-            ) {
-              e.preventDefault();
-            }
-          });
         });
+
+        // Event listener for the minus button
+        minusButton.addEventListener("click", function () {
+          const currentQuantity = parseInt(quantityInput.value);
+          if (currentQuantity > 1) {
+            const newQuantity = currentQuantity - 1;
+            quantityInput.value = newQuantity.toString();
+            updateAvailability(newQuantity);
+          }
+        });
+
+        // Handle direct input changes
+        quantityInput.addEventListener("input", function () {
+          let inputValue = parseInt(quantityInput.value);
+
+          if (isNaN(inputValue) || inputValue < 1) {
+            quantityInput.value = "1";
+            updateAvailability(1);
+          } else if (inputValue > availabilityStock) {
+            inputValue = availabilityStock;
+            quantityInput.value = inputValue.toString();
+          } else {
+            updateAvailability(inputValue);
+          }
+        });
+
+        // Prevent invalid characters
+        quantityInput.addEventListener("keydown", function (e) {
+          const invalidKeys = ["-", "e", "+", "."];
+          if (
+            invalidKeys.includes(e.key) ||
+            (e.shiftKey && ["+", "-"].includes(e.key))
+          ) {
+            e.preventDefault();
+          }
+        });
+
+        // Update the buttons' state based on the stock initially
         updateButtonsState(availabilityStock);
       }
     }

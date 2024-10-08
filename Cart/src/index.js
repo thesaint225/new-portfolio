@@ -70,12 +70,12 @@ if (productGridElement) {
             var plusButton_1 = productCard.querySelector(".plus");
             var minusButton_1 = productCard.querySelector(".minus");
             var quantityInput_1 = productCard.querySelector(".quantity-input");
-            var availabilityElement_1 = document.querySelector(".availability-value");
+            var availabilityElement_1 = productCard.querySelector(".availability-value");
             // Initialize default quantity
             var currentQuantity_1 = 1;
             var availabilityStock_1 = product.availability;
             function updateAvailability(newQuantity) {
-                var remainingStock = availabilityStock_1 - newQuantity + currentQuantity_1;
+                var remainingStock = availabilityStock_1 - newQuantity;
                 currentQuantity_1 = newQuantity;
                 if (availabilityElement_1) {
                     availabilityElement_1.textContent = remainingStock.toString();
@@ -101,6 +101,7 @@ if (productGridElement) {
                 }
             }
             if (plusButton_1 && minusButton_1 && quantityInput_1) {
+                // Event listener for the plus button
                 plusButton_1.addEventListener("click", function () {
                     var currentQuantity = parseInt(quantityInput_1.value);
                     if (currentQuantity < availabilityStock_1) {
@@ -108,39 +109,40 @@ if (productGridElement) {
                         quantityInput_1.value = newQuantity.toString();
                         updateAvailability(newQuantity);
                     }
-                    minusButton_1.addEventListener("click", function () {
-                        var currentQuantity = parseInt(quantityInput_1.value);
-                        if (currentQuantity > 1) {
-                            var newQuantity = currentQuantity - 1;
-                            quantityInput_1.value = newQuantity.toString();
-                            updateAvailability(newQuantity);
-                        }
-                    });
-                    //   handle  direct input  changes
-                    quantityInput_1.addEventListener("input", function () {
-                        var inputValue = parseInt(quantityInput_1.value);
-                        if (isNaN(inputValue) || inputValue < 1) {
-                            quantityInput_1.value = "1";
-                            updateAvailability(1);
-                        }
-                        else if (inputValue > availabilityStock_1) {
-                            inputValue = availabilityStock_1;
-                            quantityInput_1.value = inputValue.toString();
-                        }
-                        else {
-                            updateAvailability(inputValue);
-                        }
-                    });
-                    //
-                    // Prevent invalid characters like '-' or 'e' and combinations with Shift key
-                    quantityInput_1.addEventListener("keydown", function (e) {
-                        var invalidKeys = ["-", "e", "+", "."];
-                        if (invalidKeys.includes(e.key) ||
-                            (e.shiftKey && ["+", "-"].includes(e.key))) {
-                            e.preventDefault();
-                        }
-                    });
                 });
+                // Event listener for the minus button
+                minusButton_1.addEventListener("click", function () {
+                    var currentQuantity = parseInt(quantityInput_1.value);
+                    if (currentQuantity > 1) {
+                        var newQuantity = currentQuantity - 1;
+                        quantityInput_1.value = newQuantity.toString();
+                        updateAvailability(newQuantity);
+                    }
+                });
+                // Handle direct input changes
+                quantityInput_1.addEventListener("input", function () {
+                    var inputValue = parseInt(quantityInput_1.value);
+                    if (isNaN(inputValue) || inputValue < 1) {
+                        quantityInput_1.value = "1";
+                        updateAvailability(1);
+                    }
+                    else if (inputValue > availabilityStock_1) {
+                        inputValue = availabilityStock_1;
+                        quantityInput_1.value = inputValue.toString();
+                    }
+                    else {
+                        updateAvailability(inputValue);
+                    }
+                });
+                // Prevent invalid characters
+                quantityInput_1.addEventListener("keydown", function (e) {
+                    var invalidKeys = ["-", "e", "+", "."];
+                    if (invalidKeys.includes(e.key) ||
+                        (e.shiftKey && ["+", "-"].includes(e.key))) {
+                        e.preventDefault();
+                    }
+                });
+                // Update the buttons' state based on the stock initially
                 updateButtonsState(availabilityStock_1);
             }
         }
