@@ -54,12 +54,13 @@ var products = [
 ];
 var productGridElement = document.querySelector("#productGrid");
 console.log(productGridElement);
+var cartCountElement = document.querySelector(".cart-count");
 if (productGridElement) {
     // Loop through products and create product cards dynamically
     products.forEach(function (product) {
-        var productHTML = "\n    <div class=\"product-card\" data-id=\"".concat(product.id, "\">\n      <img src=\"").concat(product.image, "\" alt=\"").concat(product.name, "\">\n      <div class=\"product-info\">\n        <h3>").concat(product.name, "</h3>\n        <p class=\"product-sku\">SKU: ").concat(product.sku, "</p>\n        <p class=\"product-price\">$").concat(product.price, " <span>$").concat(product.originalPrice, "</span></p>\n<p class=\"product-availability\">In Stock: <span class=\"availability-value\">").concat(product.availability, "</span></p>}</p>\n        <p class=\"product-description\">").concat(product.description, "</p>\n        <div class=\"product-tags\">\n          ").concat(product.tags
+        var productHTML = "\n    <div class=\"product-card\" data-id=\"".concat(product.id, "\">\n      <img src=\"").concat(product.image, "\" alt=\"").concat(product.name, "\">\n      <div class=\"product-info\">\n        <h3>").concat(product.name, "</h3>\n        <p class=\"product-sku\">SKU: ").concat(product.sku, "</p>\n        <p class=\"product-price\">$").concat(product.price, " <span>$").concat(product.originalPrice, "</span></p>\n<p class=\"product-availability\">In Stock: <span class=\"availability-value\">").concat(product.availability, "</span></p></p>\n        <p class=\"product-description\">").concat(product.description, "</p>\n        <div class=\"product-tags\">\n          ").concat(product.tags
             .map(function (tag) { return "<span class=\"tag\">".concat(tag, "</span>"); })
-            .join(""), "\n        </div>\n      </div>\n      <div class=\"related-products\">\n        <h4>You May Also Like</h4>\n        <ul>\n          ").concat(product.relatedProducts.map(function (item) { return "<li>".concat(item, "</li>"); }).join(""), "\n        </ul>\n      </div>\n      <div class=\"quantity-selector\">\n        <button class=\"quantity-btn minus\" data-id=\"").concat(product.id, "\">-</button>\n        <input type=\"number\" class=\"quantity-input\" value=\"1\" min=\"1\" max=\"").concat(product.availability, "\" data-id=\"").concat(product.id, "\">\n        <button class=\"quantity-btn plus\" data-id=\"").concat(product.id, "\">+</button>\n      </div>\n      <button class=\"add-to-cart\" data-id=\"").concat(product.id, "\">Add to Cart</button>\n    </div>\n  ");
+            .join(""), "\n        </div>\n      </div>\n      <div class=\"related-products\">\n        <h4>You May Also Like</h4>\n        <ul>\n          ").concat(product.relatedProducts.map(function (item) { return "<li>".concat(item, "</li>"); }).join(""), "\n        </ul>\n      </div>\n      <div class=\"quantity-selector\">\n        <button class=\"quantity-btn minus\" data-id=\"").concat(product.id, "\">-</button>\n        <input type=\"number\" class=\"quantity-input\" value=\"0\" min=\"1\" max=\"").concat(product.availability, "\" data-id=\"").concat(product.id, "\">\n        <button class=\"quantity-btn plus\" data-id=\"").concat(product.id, "\">+</button>\n      </div>\n     \n    </div>\n  ");
         // append  generated HTML to product grid  container
         productGridElement.insertAdjacentHTML("beforeend", productHTML);
         // Get last added product card to attach event listener
@@ -72,7 +73,7 @@ if (productGridElement) {
             var quantityInput_1 = productCard.querySelector(".quantity-input");
             var availabilityElement_1 = productCard.querySelector(".availability-value");
             // Initialize default quantity
-            var currentQuantity_1 = 1;
+            var currentQuantity_1 = 0;
             var availabilityStock_1 = product.availability;
             function updateAvailability(newQuantity) {
                 var remainingStock = availabilityStock_1 - newQuantity;
@@ -92,7 +93,7 @@ if (productGridElement) {
                         plusButton_1.removeAttribute("disabled");
                     }
                     //   if the current quantity is 1 or less,disable minus button
-                    if (currentQuantity_1 <= 1) {
+                    if (currentQuantity_1 <= 0) {
                         minusButton_1.setAttribute("disabled", "true");
                     }
                     else {
@@ -113,7 +114,7 @@ if (productGridElement) {
                 // Event listener for the minus button
                 minusButton_1.addEventListener("click", function () {
                     var currentQuantity = parseInt(quantityInput_1.value);
-                    if (currentQuantity > 1) {
+                    if (currentQuantity > 0) {
                         var newQuantity = currentQuantity - 1;
                         quantityInput_1.value = newQuantity.toString();
                         updateAvailability(newQuantity);
@@ -147,4 +148,19 @@ if (productGridElement) {
             }
         }
     });
+}
+// function update cart count based on the quantities across all inputs
+function updateCartCount() {
+    var quantityInputs = document.querySelectorAll(".quantity-input");
+    var totalQuantity = 0;
+    quantityInputs.forEach(function (input) {
+        var inputValue = parseInt(input.value);
+        if (!isNaN(inputValue)) {
+            totalQuantity += inputValue;
+        }
+    });
+    // Update the cart count element with the total quantity
+    if (cartCountElement) {
+        cartCountElement.textContent = totalQuantity.toString();
+    }
 }

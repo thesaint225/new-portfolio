@@ -62,6 +62,9 @@ const productGridElement: HTMLDivElement | null =
   document.querySelector("#productGrid");
 console.log(productGridElement);
 
+const cartCountElement: HTMLElement | null =
+  document.querySelector(".cart-count");
+
 if (productGridElement) {
   // Loop through products and create product cards dynamically
   products.forEach((product) => {
@@ -76,7 +79,7 @@ if (productGridElement) {
     }</span></p>
 <p class="product-availability">In Stock: <span class="availability-value">${
       product.availability
-    }</span></p>}</p>
+    }</span></p></p>
         <p class="product-description">${product.description}</p>
         <div class="product-tags">
           ${product.tags
@@ -92,12 +95,12 @@ if (productGridElement) {
       </div>
       <div class="quantity-selector">
         <button class="quantity-btn minus" data-id="${product.id}">-</button>
-        <input type="number" class="quantity-input" value="1" min="1" max="${
+        <input type="number" class="quantity-input" value="0" min="1" max="${
           product.availability
         }" data-id="${product.id}">
         <button class="quantity-btn plus" data-id="${product.id}">+</button>
       </div>
-      <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
+     
     </div>
   `;
     // append  generated HTML to product grid  container
@@ -120,7 +123,7 @@ if (productGridElement) {
       );
 
       // Initialize default quantity
-      let currentQuantity = 1;
+      let currentQuantity = 0;
       let availabilityStock = product.availability;
 
       function updateAvailability(newQuantity: number) {
@@ -143,7 +146,7 @@ if (productGridElement) {
           }
 
           //   if the current quantity is 1 or less,disable minus button
-          if (currentQuantity <= 1) {
+          if (currentQuantity <= 0) {
             minusButton.setAttribute("disabled", "true");
           } else {
             minusButton.removeAttribute("disabled");
@@ -166,7 +169,7 @@ if (productGridElement) {
         // Event listener for the minus button
         minusButton.addEventListener("click", function () {
           const currentQuantity = parseInt(quantityInput.value);
-          if (currentQuantity > 1) {
+          if (currentQuantity > 0) {
             const newQuantity = currentQuantity - 1;
             quantityInput.value = newQuantity.toString();
             updateAvailability(newQuantity);
@@ -204,4 +207,23 @@ if (productGridElement) {
       }
     }
   });
+}
+
+// function update cart count based on the quantities across all inputs
+
+function updateCartCount() {
+  const quantityInputs = document.querySelectorAll(".quantity-input");
+  let totalQuantity = 0;
+
+  quantityInputs.forEach((input) => {
+    const inputValue = parseInt((input as HTMLInputElement).value);
+    if (!isNaN(inputValue)) {
+      totalQuantity += inputValue;
+    }
+  });
+
+  // Update the cart count element with the total quantity
+  if (cartCountElement) {
+    cartCountElement.textContent = totalQuantity.toString();
+  }
 }
