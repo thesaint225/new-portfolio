@@ -109,6 +109,7 @@ if (productGridElement) {
                         var newQuantity = currentQuantity + 1;
                         quantityInput_1.value = newQuantity.toString();
                         updateAvailability(newQuantity);
+                        updateCartCount();
                     }
                 });
                 // Event listener for the minus button
@@ -118,6 +119,7 @@ if (productGridElement) {
                         var newQuantity = currentQuantity - 1;
                         quantityInput_1.value = newQuantity.toString();
                         updateAvailability(newQuantity);
+                        updateCartCount();
                     }
                 });
                 // Handle direct input changes
@@ -134,6 +136,7 @@ if (productGridElement) {
                     else {
                         updateAvailability(inputValue);
                     }
+                    updateCartCount();
                 });
                 // Prevent invalid characters
                 quantityInput_1.addEventListener("keydown", function (e) {
@@ -152,6 +155,7 @@ if (productGridElement) {
 // function update cart count based on the quantities across all inputs
 function updateCartCount() {
     var quantityInputs = document.querySelectorAll(".quantity-input");
+    console.log(quantityInputs);
     var totalQuantity = 0;
     quantityInputs.forEach(function (input) {
         var inputValue = parseInt(input.value);

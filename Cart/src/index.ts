@@ -163,6 +163,7 @@ if (productGridElement) {
             const newQuantity = currentQuantity + 1;
             quantityInput.value = newQuantity.toString();
             updateAvailability(newQuantity);
+            updateCartCount();
           }
         });
 
@@ -173,6 +174,7 @@ if (productGridElement) {
             const newQuantity = currentQuantity - 1;
             quantityInput.value = newQuantity.toString();
             updateAvailability(newQuantity);
+            updateCartCount();
           }
         });
 
@@ -189,6 +191,7 @@ if (productGridElement) {
           } else {
             updateAvailability(inputValue);
           }
+          updateCartCount();
         });
 
         // Prevent invalid characters
@@ -213,6 +216,7 @@ if (productGridElement) {
 
 function updateCartCount() {
   const quantityInputs = document.querySelectorAll(".quantity-input");
+  console.log(quantityInputs);
   let totalQuantity = 0;
 
   quantityInputs.forEach((input) => {
