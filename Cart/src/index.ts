@@ -126,7 +126,7 @@ if (productGridElement) {
       let currentQuantity = 0;
       let availabilityStock = product.availability;
 
-      function updateAvailability(newQuantity: number) {
+      const updateAvailability = (newQuantity: number) => {
         const remainingStock = availabilityStock - newQuantity;
         currentQuantity = newQuantity;
 
@@ -134,9 +134,9 @@ if (productGridElement) {
           availabilityElement.textContent = remainingStock.toString();
         }
         updateButtonsState(remainingStock);
-      }
+      };
 
-      function updateButtonsState(remainingStock: number) {
+      const updateButtonsState = (remainingStock: number) => {
         if (plusButton && minusButton) {
           // if the remaining stock is 0 or less than  zero disable the button
           if (remainingStock <= 0) {
@@ -152,7 +152,7 @@ if (productGridElement) {
             minusButton.removeAttribute("disabled");
           }
         }
-      }
+      };
 
       if (plusButton && minusButton && quantityInput) {
         // Event listener for the plus button
@@ -164,6 +164,7 @@ if (productGridElement) {
             quantityInput.value = newQuantity.toString();
             updateAvailability(newQuantity);
             updateCartCount();
+            saveCartToLocalStorage();
           }
         });
 
@@ -175,15 +176,19 @@ if (productGridElement) {
             quantityInput.value = newQuantity.toString();
             updateAvailability(newQuantity);
             updateCartCount();
+            saveCartToLocalStorage();
           }
         });
 
         // Handle direct input changes
+        /**fix the input when user input number directly there is a leading zero
+         * also remove the top arrow and down arrow
+         */
         quantityInput.addEventListener("input", function () {
           let inputValue = parseInt(quantityInput.value);
 
           if (isNaN(inputValue) || inputValue < 1) {
-            quantityInput.value = "1";
+            quantityInput.value = "0";
             updateAvailability(1);
           } else if (inputValue > availabilityStock) {
             inputValue = availabilityStock;
@@ -192,6 +197,7 @@ if (productGridElement) {
             updateAvailability(inputValue);
           }
           updateCartCount();
+          saveCartToLocalStorage();
         });
 
         // Prevent invalid characters
@@ -207,6 +213,7 @@ if (productGridElement) {
 
         // Update the buttons' state based on the stock initially
         updateButtonsState(availabilityStock);
+        // saveCartToLocalStorage();
       }
     }
   });
@@ -214,7 +221,7 @@ if (productGridElement) {
 
 // function update cart count based on the quantities across all inputs
 
-function updateCartCount() {
+const updateCartCount = () => {
   const quantityInputs = document.querySelectorAll(".quantity-input");
   console.log(quantityInputs);
   let totalQuantity = 0;
@@ -230,4 +237,26 @@ function updateCartCount() {
   if (cartCountElement) {
     cartCountElement.textContent = totalQuantity.toString();
   }
-}
+};
+
+// create function to save data in the localStorage
+
+const saveCartToLocalStorage = () => {
+  // create an  array to store the cart data
+  const cartData: { id: string | null; quantity: number }[] = [];
+  // select all quantity input fields
+  const quantityInputs = document.querySelectorAll(".quantity-input");
+  if (quantityInputs) {
+    quantityInputs.forEach((input) => {
+      // Get product ID form data-attribute
+      const productId = input.getAttribute("data-id");
+      //   Get quantity ,convert it to number
+      const quantity = parseInt((input as HTMLInputElement).value);
+      if (!isNaN(quantity) && quantity > 0) {
+        cartData.push({ id: productId, quantity });
+      }
+    });
+  }
+  //   save cart data as Json  string in the local storage
+  localStorage.setItem("cart", JSON.stringify(cartData));
+};

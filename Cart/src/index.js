@@ -75,15 +75,15 @@ if (productGridElement) {
             // Initialize default quantity
             var currentQuantity_1 = 0;
             var availabilityStock_1 = product.availability;
-            function updateAvailability(newQuantity) {
+            var updateAvailability_1 = function (newQuantity) {
                 var remainingStock = availabilityStock_1 - newQuantity;
                 currentQuantity_1 = newQuantity;
                 if (availabilityElement_1) {
                     availabilityElement_1.textContent = remainingStock.toString();
                 }
-                updateButtonsState(remainingStock);
-            }
-            function updateButtonsState(remainingStock) {
+                updateButtonsState_1(remainingStock);
+            };
+            var updateButtonsState_1 = function (remainingStock) {
                 if (plusButton_1 && minusButton_1) {
                     // if the remaining stock is 0 or less than  zero disable the button
                     if (remainingStock <= 0) {
@@ -100,7 +100,7 @@ if (productGridElement) {
                         minusButton_1.removeAttribute("disabled");
                     }
                 }
-            }
+            };
             if (plusButton_1 && minusButton_1 && quantityInput_1) {
                 // Event listener for the plus button
                 plusButton_1.addEventListener("click", function () {
@@ -108,8 +108,9 @@ if (productGridElement) {
                     if (currentQuantity < availabilityStock_1) {
                         var newQuantity = currentQuantity + 1;
                         quantityInput_1.value = newQuantity.toString();
-                        updateAvailability(newQuantity);
+                        updateAvailability_1(newQuantity);
                         updateCartCount();
+                        saveCartToLocalStorage();
                     }
                 });
                 // Event listener for the minus button
@@ -118,25 +119,27 @@ if (productGridElement) {
                     if (currentQuantity > 0) {
                         var newQuantity = currentQuantity - 1;
                         quantityInput_1.value = newQuantity.toString();
-                        updateAvailability(newQuantity);
+                        updateAvailability_1(newQuantity);
                         updateCartCount();
+                        saveCartToLocalStorage();
                     }
                 });
                 // Handle direct input changes
                 quantityInput_1.addEventListener("input", function () {
                     var inputValue = parseInt(quantityInput_1.value);
                     if (isNaN(inputValue) || inputValue < 1) {
-                        quantityInput_1.value = "1";
-                        updateAvailability(1);
+                        quantityInput_1.value = "0";
+                        updateAvailability_1(0);
                     }
                     else if (inputValue > availabilityStock_1) {
                         inputValue = availabilityStock_1;
                         quantityInput_1.value = inputValue.toString();
                     }
                     else {
-                        updateAvailability(inputValue);
+                        updateAvailability_1(inputValue);
                     }
                     updateCartCount();
+                    saveCartToLocalStorage();
                 });
                 // Prevent invalid characters
                 quantityInput_1.addEventListener("keydown", function (e) {
@@ -147,13 +150,14 @@ if (productGridElement) {
                     }
                 });
                 // Update the buttons' state based on the stock initially
-                updateButtonsState(availabilityStock_1);
+                updateButtonsState_1(availabilityStock_1);
+                // saveCartToLocalStorage();
             }
         }
     });
 }
 // function update cart count based on the quantities across all inputs
-function updateCartCount() {
+var updateCartCount = function () {
     var quantityInputs = document.querySelectorAll(".quantity-input");
     console.log(quantityInputs);
     var totalQuantity = 0;
@@ -167,4 +171,24 @@ function updateCartCount() {
     if (cartCountElement) {
         cartCountElement.textContent = totalQuantity.toString();
     }
-}
+};
+// create function to save data in the localStorage
+var saveCartToLocalStorage = function () {
+    // create an  array to store the cart data
+    var cartData = [];
+    // select all quantity input fields
+    var quantityInputs = document.querySelectorAll(".quantity-input");
+    if (quantityInputs) {
+        quantityInputs.forEach(function (input) {
+            // Get product ID form data-attribute
+            var productId = input.getAttribute("data-id");
+            //   Get quantity ,convert it to number
+            var quantity = parseInt(input.value);
+            if (!isNaN(quantity) && quantity > 0) {
+                cartData.push({ id: productId, quantity: quantity });
+            }
+        });
+    }
+    //   save cart data as Json  string in the local storage
+    localStorage.setItem("cart", JSON.stringify(cartData));
+};
