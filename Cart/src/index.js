@@ -50,6 +50,8 @@ var products = [
         relatedProducts: ["Classic Denim Jacket", "Slim Fit Chinos"],
     },
 ];
+// Use a more efficient data structure for products
+var productMap = new Map(products.map(function (product) { return [product.id, product]; }));
 var cartData = [];
 /**
  * Updates the state of quantity adjustment buttons based on current quantity and stock.
@@ -64,9 +66,11 @@ var updateButtonsState = function (plusButton, minusButton, currentQuantity, rem
         minusButton.disabled = currentQuantity <= 0;
     }
 };
-// function update the updateAvailability
+/**
+ * Updates the displayed availability of a product.
+ */
 var updateAvailability = function (availabilityElement, newQuantity, availabilityStock) {
-    var remainingStock = availabilityStock - newQuantity;
+    var remainingStock = Math.max(0, availabilityStock - newQuantity);
     if (availabilityElement) {
         availabilityElement.textContent = remainingStock.toString();
     }
@@ -115,29 +119,35 @@ function updateUIFromCartData() {
     });
 }
 //  Function to add/update items in the cart
-function addToCart(productId, quantity) {
-    var existingProductIndex = cartData.findIndex(function (item) { return item.id === productId; });
-    if (existingProductIndex !== -1) {
-        // Update the quantity if the product already exists in the cart
+var addToCart = function (productId, quantity) {
+    var index = cartData.findIndex(function (item) { return item.id === productId; });
+    if (index !== -1) {
         if (quantity > 0) {
-            cartData[existingProductIndex].quantity = quantity;
+            cartData[index].quantity = quantity;
         }
         else {
-            // Remove the product from the cart if quantity is 0
-            cartData.splice(existingProductIndex, 1);
+            cartData.splice(index, 1);
         }
     }
     else if (quantity > 0) {
-        // Add the product if it doesn't exist in the cart and quantity is greater than 0
         cartData.push({ id: productId, quantity: quantity });
     }
     saveCartToLocalStorage();
-    updateCartCount(); // Update cart count based on loaded cart data
-}
-function saveCartToLocalStorage() {
-    localStorage.setItem("cart", JSON.stringify(cartData));
-    console.log("Saved cartData to localStorage:", cartData); // Debug log
-}
+    updateCartCount();
+};
+/* *
+ * Saves the current cart data to localStorage.
+ */
+var saveCartToLocalStorage = function () {
+    try {
+        localStorage.setItem("cart", JSON.stringify(cartData));
+    }
+    catch (error) {
+        console.error("Error saving cart data:", error);
+    }
+};
+/**
+
 /**
  * Creates HTML for a single product card.
  * @param product - The product data
@@ -193,9 +203,8 @@ var setupProductCardListeners = function (productCard, product) {
         }
     }
     function preventInvalidInput(e) {
-        var invalidKeys = ["-", "e", "+", "."];
-        if (invalidKeys.includes(e.key) ||
-            (e.shiftKey && ["+", "-"].includes(e.key))) {
+        if (!/^[0-9]$/.test(e.key) &&
+            !["Backspace", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)) {
             e.preventDefault();
         }
     }
@@ -221,7 +230,6 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProductGrid();
     loadCartFromLocalStorage();
 });
-// const productGridElement: HTMLDivElement | null =
 //   document.querySelector("#productGrid");
 // const cartCountElement: HTMLElement | null =
 //   document.querySelector(".cart-count");

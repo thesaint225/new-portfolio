@@ -77,6 +77,11 @@ const products: Product[] = [
   },
 ];
 
+// Use a more efficient data structure for products
+const productMap: Map<number, Product> = new Map(
+  products.map((product) => [product.id, product])
+);
+
 let cartData: CartItem[] = [];
 
 /**
@@ -98,14 +103,15 @@ const updateButtonsState = (
     minusButton.disabled = currentQuantity <= 0;
   }
 };
-
-// function update the updateAvailability
+/**
+ * Updates the displayed availability of a product.
+ */
 const updateAvailability = (
   availabilityElement: HTMLElement | null,
   newQuantity: number,
   availabilityStock: number
-) => {
-  const remainingStock = availabilityStock - newQuantity;
+): number => {
+  const remainingStock = Math.max(0, availabilityStock - newQuantity);
   if (availabilityElement) {
     availabilityElement.textContent = remainingStock.toString();
   }
@@ -120,7 +126,6 @@ const updateCartCount = (): void => {
   const totalQuantity = Array.from(quantityInputs).reduce((total, input) => {
     return total + (parseInt(input.value) || 0);
   }, 0);
-
   const cartCountElement = document.querySelector<HTMLElement>(".cart-count");
   if (cartCountElement) {
     cartCountElement.textContent = totalQuantity.toString();
@@ -161,32 +166,32 @@ function updateUIFromCartData() {
 }
 
 //  Function to add/update items in the cart
-function addToCart(productId: number, quantity: number): void {
-  const existingProductIndex = cartData.findIndex(
-    (item) => item.id === productId
-  );
-
-  if (existingProductIndex !== -1) {
-    // Update the quantity if the product already exists in the cart
+const addToCart = (productId: number, quantity: number): void => {
+  const index = cartData.findIndex((item) => item.id === productId);
+  if (index !== -1) {
     if (quantity > 0) {
-      cartData[existingProductIndex].quantity = quantity;
+      cartData[index].quantity = quantity;
     } else {
-      // Remove the product from the cart if quantity is 0
-      cartData.splice(existingProductIndex, 1);
+      cartData.splice(index, 1);
     }
   } else if (quantity > 0) {
-    // Add the product if it doesn't exist in the cart and quantity is greater than 0
     cartData.push({ id: productId, quantity });
   }
-
   saveCartToLocalStorage();
-  updateCartCount(); // Update cart count based on loaded cart data
-}
+  updateCartCount();
+};
+/* *
+ * Saves the current cart data to localStorage.
+ */
+const saveCartToLocalStorage = (): void => {
+  try {
+    localStorage.setItem("cart", JSON.stringify(cartData));
+  } catch (error) {
+    console.error("Error saving cart data:", error);
+  }
+};
 
-function saveCartToLocalStorage() {
-  localStorage.setItem("cart", JSON.stringify(cartData));
-  console.log("Saved cartData to localStorage:", cartData); // Debug log
-}
+/**
 
 /**
  * Creates HTML for a single product card.
@@ -301,10 +306,9 @@ const setupProductCardListeners = (
   }
 
   function preventInvalidInput(e: KeyboardEvent): void {
-    const invalidKeys = ["-", "e", "+", "."];
     if (
-      invalidKeys.includes(e.key) ||
-      (e.shiftKey && ["+", "-"].includes(e.key))
+      !/^[0-9]$/.test(e.key) &&
+      !["Backspace", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
     ) {
       e.preventDefault();
     }
@@ -335,7 +339,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadCartFromLocalStorage();
 });
 
-// const productGridElement: HTMLDivElement | null =
 //   document.querySelector("#productGrid");
 
 // const cartCountElement: HTMLElement | null =
