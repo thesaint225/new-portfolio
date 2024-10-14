@@ -1,5 +1,26 @@
+// Product interface for type safety
+
+interface Product {
+  id: number;
+  name: string;
+  sku: string;
+  price: number;
+  originalPrice: number;
+  availability: number;
+  description: string;
+  image: string;
+  tags: string[];
+  relatedProducts: string[];
+}
+
+// CartItem interface for type safety
+interface CartItem {
+  id: number;
+  quantity: number;
+}
+
 // define  Product Data as array of objects
-const products = [
+const products: Product[] = [
   {
     id: 1,
     name: "Trendy Graphic Tee",
@@ -13,8 +34,6 @@ const products = [
     tags: ["Fashion", "Casual"],
     relatedProducts: ["Classic Denim Jacket", "Slim Fit Chinos"],
   },
-  // Add more product objects here
-
   {
     id: 2,
     name: "Trendy Graphic Tee",
@@ -28,7 +47,7 @@ const products = [
     tags: ["Fashion", "Casual"],
     relatedProducts: ["Classic Denim Jacket", "Slim Fit Chinos"],
   },
-  // Add more product objects here
+
   {
     id: 3,
     name: "Trendy Graphic Tee",
@@ -42,7 +61,7 @@ const products = [
     tags: ["Fashion", "Casual"],
     relatedProducts: ["Classic Denim Jacket", "Slim Fit Chinos"],
   },
-  // Add more product objects here
+
   {
     id: 4,
     name: "Trendy Graphic Tee",
@@ -58,37 +77,28 @@ const products = [
   },
 ];
 
-let cartData: { id: number; quantity: number }[] = [];
+let cartData: CartItem[] = [];
 
-// update the state button
+/**
+ * Updates the state of quantity adjustment buttons based on current quantity and stock.
+ * @param plusButton - The button to increase quantity
+ * @param minusButton - The button to decrease quantity
+ * @param currentQuantity - The current quantity in the cart
+ * @param remainingStock - The remaining stock of the product
+ */
+
 const updateButtonsState = (
   plusButton: HTMLButtonElement | null,
   minusButton: HTMLButtonElement | null,
   currentQuantity: number,
   remainingStock: number
-) => {
+): void => {
   if (plusButton && minusButton) {
-    if (remainingStock <= 0) {
-      plusButton.setAttribute("disabled", "true");
-    } else {
-      plusButton.removeAttribute("disabled");
-    }
-
-    if (currentQuantity <= 0) {
-      minusButton.setAttribute("disabled", "true");
-    } else {
-      minusButton.removeAttribute("disabled");
-    }
+    plusButton.disabled = remainingStock <= 0;
+    minusButton.disabled = currentQuantity <= 0;
   }
 };
 
-// define the structure for a cart item
-interface CartItem {
-  id: number;
-  quantity: number;
-}
-
-// define functions outside the loop to make  them accessible
 // function update the updateAvailability
 const updateAvailability = (
   availabilityElement: HTMLElement | null,
@@ -101,36 +111,38 @@ const updateAvailability = (
   }
   return remainingStock;
 };
-// function update cart count based on the quantities across all inputs
+/**
+ * Updates the total cart count displayed in the UI.
+ */
+const updateCartCount = (): void => {
+  const quantityInputs =
+    document.querySelectorAll<HTMLInputElement>(".quantity-input");
+  const totalQuantity = Array.from(quantityInputs).reduce((total, input) => {
+    return total + (parseInt(input.value) || 0);
+  }, 0);
 
-const updateCartCount = () => {
-  const quantityInputs = document.querySelectorAll(".quantity-input");
-
-  let totalQuantity = 0;
-
-  quantityInputs.forEach((input) => {
-    const inputValue = parseInt((input as HTMLInputElement).value);
-    if (!isNaN(inputValue)) {
-      totalQuantity += inputValue;
-    }
-  });
-
-  // Update the cart count element with the total quantity
+  const cartCountElement = document.querySelector<HTMLElement>(".cart-count");
   if (cartCountElement) {
     cartCountElement.textContent = totalQuantity.toString();
   }
 };
 
-// load cart data from localStorage
-
-function loadCartFromLocalStorage() {
+/**
+ * Loads cart data from localStorage and updates the UI.
+ */
+const loadCartFromLocalStorage = (): void => {
   const storedCart = localStorage.getItem("cart");
   if (storedCart) {
-    cartData = JSON.parse(storedCart);
-    updateUIFromCartData(); // Update UI based on loaded cart data
-    updateCartCount(); // Update cart count based on loaded cart data
+    try {
+      cartData = JSON.parse(storedCart);
+      updateUIFromCartData();
+      updateCartCount();
+    } catch (error) {
+      console.error("Error parsing cart data:", error);
+      cartData = [];
+    }
   }
-}
+};
 
 // Function to update the UI based on cart data
 function updateUIFromCartData() {
@@ -149,7 +161,7 @@ function updateUIFromCartData() {
 }
 
 //  Function to add/update items in the cart
-function addToCart(productId: number, quantity: number) {
+function addToCart(productId: number, quantity: number): void {
   const existingProductIndex = cartData.findIndex(
     (item) => item.id === productId
   );
@@ -167,8 +179,8 @@ function addToCart(productId: number, quantity: number) {
     cartData.push({ id: productId, quantity });
   }
 
-  console.log("Updated cartData:", cartData); // Debug log
   saveCartToLocalStorage();
+  updateCartCount(); // Update cart count based on loaded cart data
 }
 
 function saveCartToLocalStorage() {
@@ -176,30 +188,24 @@ function saveCartToLocalStorage() {
   console.log("Saved cartData to localStorage:", cartData); // Debug log
 }
 
-// Call this to load cart data when the page loads
-loadCartFromLocalStorage();
-
-const productGridElement: HTMLDivElement | null =
-  document.querySelector("#productGrid");
-
-const cartCountElement: HTMLElement | null =
-  document.querySelector(".cart-count");
-
-if (productGridElement) {
-  // Loop through products and create product cards dynamically
-  products.forEach((product) => {
-    const productHTML = `
+/**
+ * Creates HTML for a single product card.
+ * @param product - The product data
+ * @returns HTML string for the product card
+ */
+const createProductCardHTML = (product: Product): string => {
+  return `
     <div class="product-card" data-id="${product.id}">
       <img src="${product.image}" alt="${product.name}">
       <div class="product-info">
         <h3>${product.name}</h3>
         <p class="product-sku">SKU: ${product.sku}</p>
         <p class="product-price">$${product.price} <span>$${
-      product.originalPrice
-    }</span></p>
-<p class="product-availability">In Stock: <span class="availability-value">${
-      product.availability
-    }</span></p></p>
+    product.originalPrice
+  }</span></p>
+        <p class="product-availability">In Stock: <span class="availability-value">${
+          product.availability
+        }</span></p>
         <p class="product-description">${product.description}</p>
         <div class="product-tags">
           ${product.tags
@@ -220,129 +226,279 @@ if (productGridElement) {
         }" data-id="${product.id}">
         <button class="quantity-btn plus" data-id="${product.id}">+</button>
       </div>
-     
     </div>
   `;
-    // append  generated HTML to product grid  container
-    productGridElement.insertAdjacentHTML("beforeend", productHTML);
+};
 
-    // Get last added product card to attach event listener
-    const productCard = productGridElement.lastElementChild;
+/**
+ * Sets up event listeners for a product card.
+ * @param productCard - The product card element
+ * @param product - The product data
+ */
+const setupProductCardListeners = (
+  productCard: Element,
+  product: Product
+): void => {
+  const plusButton = productCard.querySelector<HTMLButtonElement>(".plus");
+  const minusButton = productCard.querySelector<HTMLButtonElement>(".minus");
+  const quantityInput =
+    productCard.querySelector<HTMLInputElement>(".quantity-input");
+  const availabilityElement = productCard.querySelector<HTMLElement>(
+    ".availability-value"
+  );
 
-    // check if productCard exists before proceeding
-    if (productCard) {
-      // Add event listener for + button
-      const plusButton: HTMLButtonElement | null =
-        productCard.querySelector(".plus");
-      const minusButton: HTMLButtonElement | null =
-        productCard.querySelector(".minus");
-      const quantityInput: HTMLInputElement | null =
-        productCard.querySelector(".quantity-input");
-      const availabilityElement: HTMLElement | null = productCard.querySelector(
-        ".availability-value"
+  let availabilityStock = product.availability;
+
+  if (plusButton && minusButton && quantityInput) {
+    plusButton.addEventListener("click", () => handleQuantityChange(1));
+    minusButton.addEventListener("click", () => handleQuantityChange(-1));
+    quantityInput.addEventListener("input", handleDirectInput);
+    quantityInput.addEventListener("keydown", preventInvalidInput);
+
+    // Initialize button states
+    const currentQuantity = parseInt(quantityInput.value) || 0;
+    updateButtonsState(
+      plusButton,
+      minusButton,
+      currentQuantity,
+      availabilityStock
+    );
+  }
+
+  function handleQuantityChange(change: number): void {
+    if (quantityInput) {
+      let currentQuantity = parseInt(quantityInput.value);
+      const newQuantity = Math.max(
+        0,
+        Math.min(currentQuantity + change, availabilityStock)
       );
+      quantityInput.value = newQuantity.toString();
 
-      // Initialize stock
-      let availabilityStock = product.availability;
-
-      if (plusButton && minusButton && quantityInput) {
-        // Event listener for the plus button
-        plusButton.addEventListener("click", function () {
-          let currentQuantity = parseInt(quantityInput.value);
-
-          if (currentQuantity < availabilityStock) {
-            const newQuantity = currentQuantity + 1;
-            quantityInput.value = newQuantity.toString();
-
-            // Update cart and UI
-            const remainingStock = updateAvailability(
-              availabilityElement,
-              newQuantity,
-              availabilityStock
-            );
-            updateButtonsState(
-              plusButton,
-              minusButton,
-              newQuantity,
-              remainingStock
-            );
-            addToCart(product.id, newQuantity);
-            saveCartToLocalStorage();
-            updateCartCount();
-          }
-        });
-
-        // Event listener for the minus button
-        minusButton.addEventListener("click", function () {
-          const currentQuantity = parseInt(quantityInput.value);
-          if (currentQuantity > 0) {
-            const newQuantity = currentQuantity - 1;
-            quantityInput.value = newQuantity.toString();
-
-            // Update cart and UI
-            const remainingStock = updateAvailability(
-              availabilityElement,
-              newQuantity,
-              availabilityStock
-            );
-            updateButtonsState(
-              plusButton,
-              minusButton,
-              newQuantity,
-              remainingStock
-            );
-            addToCart(product.id, newQuantity);
-            saveCartToLocalStorage();
-            updateCartCount();
-          }
-        });
-
-        // Handle direct input changes
-        quantityInput.addEventListener("input", function () {
-          let inputValue = parseInt(quantityInput.value);
-
-          if (isNaN(inputValue) || inputValue < 1) {
-            quantityInput.value = "0";
-            addToCart(product.id, 0); // Ensure cart is updated with 0 or removed
-          } else if (inputValue > availabilityStock) {
-            inputValue = availabilityStock;
-            quantityInput.value = inputValue.toString();
-          }
-
-          updateAvailability(
-            availabilityElement,
-            inputValue,
-            availabilityStock
-          );
-          addToCart(product.id, inputValue);
-          saveCartToLocalStorage();
-          updateCartCount();
-        });
-
-        // Prevent invalid characters in input field
-        quantityInput.addEventListener("keydown", function (e) {
-          const invalidKeys = ["-", "e", "+", "."];
-          if (
-            invalidKeys.includes(e.key) ||
-            (e.shiftKey && ["+", "-"].includes(e.key))
-          ) {
-            e.preventDefault();
-          }
-        });
-
-        // Initialize button states
-        const currentQuantity = parseInt(quantityInput.value) || 0;
-        updateButtonsState(
-          plusButton,
-          minusButton,
-          currentQuantity,
-          availabilityStock
-        );
-        saveCartToLocalStorage(); // Ensure the cart is saved initially
-      }
+      const remainingStock = updateAvailability(
+        availabilityElement,
+        newQuantity,
+        availabilityStock
+      );
+      updateButtonsState(plusButton, minusButton, newQuantity, remainingStock);
+      addToCart(product.id, newQuantity);
     }
-  });
+  }
+
+  function handleDirectInput(): void {
+    if (quantityInput) {
+      let inputValue = parseInt(quantityInput.value);
+
+      if (isNaN(inputValue) || inputValue < 0) {
+        inputValue = 0;
+      } else if (inputValue > availabilityStock) {
+        inputValue = availabilityStock;
+      }
+
+      quantityInput.value = inputValue.toString();
+      updateAvailability(availabilityElement, inputValue, availabilityStock);
+      addToCart(product.id, inputValue);
+    }
+  }
+
+  function preventInvalidInput(e: KeyboardEvent): void {
+    const invalidKeys = ["-", "e", "+", "."];
+    if (
+      invalidKeys.includes(e.key) ||
+      (e.shiftKey && ["+", "-"].includes(e.key))
+    ) {
+      e.preventDefault();
+    }
+  }
+};
+
+/**
+ * Initializes the product grid with all products.
+ */
+const initializeProductGrid = (): void => {
+  const productGridElement =
+    document.querySelector<HTMLDivElement>("#productGrid");
+  if (productGridElement) {
+    products.forEach((product) => {
+      const productHTML = createProductCardHTML(product);
+      productGridElement.insertAdjacentHTML("beforeend", productHTML);
+      const productCard = productGridElement.lastElementChild;
+      if (productCard) {
+        setupProductCardListeners(productCard, product);
+      }
+    });
+  }
+};
+
+// Initialize the application
+document.addEventListener("DOMContentLoaded", () => {
+  initializeProductGrid();
   loadCartFromLocalStorage();
-}
+});
+
+// const productGridElement: HTMLDivElement | null =
+//   document.querySelector("#productGrid");
+
+// const cartCountElement: HTMLElement | null =
+//   document.querySelector(".cart-count");
+
+// if (productGridElement) {
+//   // Loop through products and create product cards dynamically
+//   products.forEach((product) => {
+//     const productHTML = `
+//     <div class="product-card" data-id="${product.id}">
+//       <img src="${product.image}" alt="${product.name}">
+//       <div class="product-info">
+//         <h3>${product.name}</h3>
+//         <p class="product-sku">SKU: ${product.sku}</p>
+//         <p class="product-price">$${product.price} <span>$${
+//       product.originalPrice
+//     }</span></p>
+// <p class="product-availability">In Stock: <span class="availability-value">${
+//       product.availability
+//     }</span></p></p>
+//         <p class="product-description">${product.description}</p>
+//         <div class="product-tags">
+//           ${product.tags
+//             .map((tag) => `<span class="tag">${tag}</span>`)
+//             .join("")}
+//         </div>
+//       </div>
+//       <div class="related-products">
+//         <h4>You May Also Like</h4>
+//         <ul>
+//           ${product.relatedProducts.map((item) => `<li>${item}</li>`).join("")}
+//         </ul>
+//       </div>
+//       <div class="quantity-selector">
+//         <button class="quantity-btn minus" data-id="${product.id}">-</button>
+//         <input type="number" class="quantity-input" value="1" min="1" max="${
+//           product.availability
+//         }" data-id="${product.id}">
+//         <button class="quantity-btn plus" data-id="${product.id}">+</button>
+//       </div>
+
+//     </div>
+//   `;
+//     // append  generated HTML to product grid  container
+//     productGridElement.insertAdjacentHTML("beforeend", productHTML);
+
+//     // Get last added product card to attach event listener
+//     const productCard = productGridElement.lastElementChild;
+
+//     // check if productCard exists before proceeding
+//     if (productCard) {
+//       // Add event listener for + button
+//       const plusButton: HTMLButtonElement | null =
+//         productCard.querySelector(".plus");
+//       const minusButton: HTMLButtonElement | null =
+//         productCard.querySelector(".minus");
+//       const quantityInput: HTMLInputElement | null =
+//         productCard.querySelector(".quantity-input");
+//       const availabilityElement: HTMLElement | null = productCard.querySelector(
+//         ".availability-value"
+//       );
+
+//       // Initialize stock
+//       let availabilityStock = product.availability;
+
+//       if (plusButton && minusButton && quantityInput) {
+//         // Event listener for the plus button
+//         plusButton.addEventListener("click", function () {
+//           let currentQuantity = parseInt(quantityInput.value);
+
+//           if (currentQuantity < availabilityStock) {
+//             const newQuantity = currentQuantity + 1;
+//             quantityInput.value = newQuantity.toString();
+
+//             // Update cart and UI
+//             const remainingStock = updateAvailability(
+//               availabilityElement,
+//               newQuantity,
+//               availabilityStock
+//             );
+//             updateButtonsState(
+//               plusButton,
+//               minusButton,
+//               newQuantity,
+//               remainingStock
+//             );
+//             addToCart(product.id, newQuantity);
+//             saveCartToLocalStorage();
+//             updateCartCount();
+//           }
+//         });
+
+//         // Event listener for the minus button
+//         minusButton.addEventListener("click", function () {
+//           const currentQuantity = parseInt(quantityInput.value);
+//           if (currentQuantity > 0) {
+//             const newQuantity = currentQuantity - 1;
+//             quantityInput.value = newQuantity.toString();
+
+//             // Update cart and UI
+//             const remainingStock = updateAvailability(
+//               availabilityElement,
+//               newQuantity,
+//               availabilityStock
+//             );
+//             updateButtonsState(
+//               plusButton,
+//               minusButton,
+//               newQuantity,
+//               remainingStock
+//             );
+//             addToCart(product.id, newQuantity);
+//             saveCartToLocalStorage();
+//             updateCartCount();
+//           }
+//         });
+
+//         // Handle direct input changes
+//         quantityInput.addEventListener("input", function () {
+//           let inputValue = parseInt(quantityInput.value);
+
+//           if (isNaN(inputValue) || inputValue < 1) {
+//             quantityInput.value = "0";
+//             addToCart(product.id, 0); // Ensure cart is updated with 0 or removed
+//           } else if (inputValue > availabilityStock) {
+//             inputValue = availabilityStock;
+//             quantityInput.value = inputValue.toString();
+//           }
+
+//           updateAvailability(
+//             availabilityElement,
+//             inputValue,
+//             availabilityStock
+//           );
+//           addToCart(product.id, inputValue);
+//           saveCartToLocalStorage();
+//           updateCartCount();
+//         });
+
+//         // Prevent invalid characters in input field
+//         quantityInput.addEventListener("keydown", function (e) {
+//           const invalidKeys = ["-", "e", "+", "."];
+//           if (
+//             invalidKeys.includes(e.key) ||
+//             (e.shiftKey && ["+", "-"].includes(e.key))
+//           ) {
+//             e.preventDefault();
+//           }
+//         });
+
+//         // Initialize button states
+//         const currentQuantity = parseInt(quantityInput.value) || 0;
+//         updateButtonsState(
+//           plusButton,
+//           minusButton,
+//           currentQuantity,
+//           availabilityStock
+//         );
+//         saveCartToLocalStorage(); // Ensure the cart is saved initially
+//       }
+//     }
+//   });
+//   loadCartFromLocalStorage();
+// }
 
 // function update cart count based on the quantities across all inputs
