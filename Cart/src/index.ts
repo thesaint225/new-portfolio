@@ -105,6 +105,10 @@ const updateButtonsState = (
 };
 /**
  * Updates the displayed availability of a product.
+ * @param availabilityElement - The element displaying availability
+ * @param newQuantity - The new quantity in the cart
+ * @param availabilityStock - The initial stock of the product
+ * @returns The remaining stock
  */
 const updateAvailability = (
   availabilityElement: HTMLElement | null,
@@ -164,8 +168,12 @@ function updateUIFromCartData() {
     }
   });
 }
+/**
+ * Adds or updates items in the cart.
+ * @param productId - The ID of the product
+ * @param quantity - The quantity to add or update
+ */
 
-//  Function to add/update items in the cart
 const addToCart = (productId: number, quantity: number): void => {
   const index = cartData.findIndex((item) => item.id === productId);
   if (index !== -1) {
@@ -318,18 +326,24 @@ const setupProductCardListeners = (
 /**
  * Initializes the product grid with all products.
  */
+/**
+ * Initializes the product grid with all products.
+ */
 const initializeProductGrid = (): void => {
   const productGridElement =
     document.querySelector<HTMLDivElement>("#productGrid");
   if (productGridElement) {
+    const fragment = document.createDocumentFragment();
     products.forEach((product) => {
-      const productHTML = createProductCardHTML(product);
-      productGridElement.insertAdjacentHTML("beforeend", productHTML);
-      const productCard = productGridElement.lastElementChild;
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = createProductCardHTML(product);
+      const productCard = tempDiv.firstElementChild;
       if (productCard) {
         setupProductCardListeners(productCard, product);
+        fragment.appendChild(productCard);
       }
     });
+    productGridElement.appendChild(fragment);
   }
 };
 

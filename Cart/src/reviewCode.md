@@ -31,7 +31,10 @@ Some functions have multiple responsibilities.
 Inconsistent use of TypeScript features.
 
 Examples:
-typescriptCopy// Repetitive product data
+typescript
+
+```
+// Repetitive product data
 {
 id: 1,
 name: "Trendy Graphic Tee",
@@ -46,28 +49,40 @@ currentQuantity: number,
 remainingStock: number
 ) => {
 // ... (handles both plus and minus buttons)
-}; 3. Security Vulnerabilities
-Issues:
+};
+```
+
+3. Security Vulnerabilities
+   Issues:
 
 Use of localStorage for potentially sensitive cart data.
 Limited input validation.
 
 Examples:
-typescriptCopy// Storing cart data in localStorage without encryption
+typescript
+
+```
+// Storing cart data in localStorage without encryption
 localStorage.setItem("cart", JSON.stringify(cartData));
 
 // Basic input validation, but could be more robust
 if (isNaN(inputValue) || inputValue < 1) {
 quantityInput.value = "0";
-} 4. Speed and Performance
-Issues:
+}
+```
+
+4. Speed and Performance
+   Issues:
 
 Frequent DOM operations.
 Individual event listeners for each product card.
 Loading all product data at once.
 
 Examples:
-javascriptCopy// Individual event listeners for each product
+javascript
+
+```
+ Individual event listeners for each product
 plusButton.addEventListener("click", function () {
 // ...
 });
@@ -76,14 +91,19 @@ minusButton.addEventListener("click", function () {
 });
 
 // Frequent DOM updates
-availabilityElement.textContent = remainingStock.toString(); 5. Documentation
-Issues:
+availabilityElement.textContent = remainingStock.toString();
+```
+
+5.  Documentation Issues:
 
 Lack of comprehensive function documentation.
 Missing overall project documentation.
 
 Examples:
-javascriptCopy// Function lacks proper documentation
+javascript
+
+```
+// Function lacks proper documentation
 function addToCart(productId: number, quantity: number) {
 // ...
 }
@@ -91,14 +111,20 @@ function addToCart(productId: number, quantity: number) {
 // Missing JSDoc comments
 const updateCartCount = () => {
 // ...
-}; 6. Naming Conventions
-Issues:
+};
+```
+
+6. Naming Conventions
+   Issues:
 
 Some variable names could be more descriptive.
 Inconsistent naming styles in some places.
 
 Examples:
-typescriptCopy// 'item' could be more specific, like 'cartItem'
+typescript
+
+```
+// 'item' could be more specific, like 'cartItem'
 cartData.forEach((item) => {
 // ...
 });
@@ -108,6 +134,8 @@ const storedCart = localStorage.getItem("cart");
 if (storedCart) {
 cartData = JSON.parse(storedCart);
 }
+```
+
 Additional Observations:
 
 Type Safety:

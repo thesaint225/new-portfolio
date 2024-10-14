@@ -68,6 +68,10 @@ var updateButtonsState = function (plusButton, minusButton, currentQuantity, rem
 };
 /**
  * Updates the displayed availability of a product.
+ * @param availabilityElement - The element displaying availability
+ * @param newQuantity - The new quantity in the cart
+ * @param availabilityStock - The initial stock of the product
+ * @returns The remaining stock
  */
 var updateAvailability = function (availabilityElement, newQuantity, availabilityStock) {
     var remainingStock = Math.max(0, availabilityStock - newQuantity);
@@ -118,7 +122,11 @@ function updateUIFromCartData() {
         }
     });
 }
-//  Function to add/update items in the cart
+/**
+ * Adds or updates items in the cart.
+ * @param productId - The ID of the product
+ * @param quantity - The quantity to add or update
+ */
 var addToCart = function (productId, quantity) {
     var index = cartData.findIndex(function (item) { return item.id === productId; });
     if (index !== -1) {
@@ -212,17 +220,23 @@ var setupProductCardListeners = function (productCard, product) {
 /**
  * Initializes the product grid with all products.
  */
+/**
+ * Initializes the product grid with all products.
+ */
 var initializeProductGrid = function () {
     var productGridElement = document.querySelector("#productGrid");
     if (productGridElement) {
+        var fragment_1 = document.createDocumentFragment();
         products.forEach(function (product) {
-            var productHTML = createProductCardHTML(product);
-            productGridElement.insertAdjacentHTML("beforeend", productHTML);
-            var productCard = productGridElement.lastElementChild;
+            var tempDiv = document.createElement("div");
+            tempDiv.innerHTML = createProductCardHTML(product);
+            var productCard = tempDiv.firstElementChild;
             if (productCard) {
                 setupProductCardListeners(productCard, product);
+                fragment_1.appendChild(productCard);
             }
         });
+        productGridElement.appendChild(fragment_1);
     }
 };
 // Initialize the application
