@@ -277,6 +277,23 @@ body {
   background-color: #27ae60;
 }
 
+.shopping-cart {
+  max-width: 800px;
+  margin: 2rem auto;
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 2rem;
+}
+
+.item-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  margin-right: 1.5rem;
+}
+
 @media screen and (min-width: 480px) {
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
