@@ -1,6 +1,7 @@
+"use strict";
 // Product interface for type safety
 // define  Product Data as array of objects
-var products = [
+const products = [
     {
         id: 1,
         name: "Trendy Graphic Tee",
@@ -51,8 +52,8 @@ var products = [
     },
 ];
 // Use a more efficient data structure for products
-var productMap = new Map(products.map(function (product) { return [product.id, product]; }));
-var cartData = [];
+const productMap = new Map(products.map((product) => [product.id, product]));
+let cartData = [];
 /**
  * Updates the state of quantity adjustment buttons based on current quantity and stock.
  * @param plusButton - The button to increase quantity
@@ -60,7 +61,7 @@ var cartData = [];
  * @param currentQuantity - The current quantity in the cart
  * @param remainingStock - The remaining stock of the product
  */
-var updateButtonsState = function (plusButton, minusButton, currentQuantity, remainingStock) {
+const updateButtonsState = (plusButton, minusButton, currentQuantity, remainingStock) => {
     if (plusButton && minusButton) {
         plusButton.disabled = remainingStock <= 0;
         minusButton.disabled = currentQuantity <= 0;
@@ -73,8 +74,8 @@ var updateButtonsState = function (plusButton, minusButton, currentQuantity, rem
  * @param availabilityStock - The initial stock of the product
  * @returns The remaining stock
  */
-var updateAvailability = function (availabilityElement, newQuantity, availabilityStock) {
-    var remainingStock = Math.max(0, availabilityStock - newQuantity);
+const updateAvailability = (availabilityElement, newQuantity, availabilityStock) => {
+    const remainingStock = Math.max(0, availabilityStock - newQuantity);
     if (availabilityElement) {
         availabilityElement.textContent = remainingStock.toString();
     }
@@ -83,12 +84,12 @@ var updateAvailability = function (availabilityElement, newQuantity, availabilit
 /**
  * Updates the total cart count displayed in the UI.
  */
-var updateCartCount = function () {
-    var quantityInputs = document.querySelectorAll(".quantity-input");
-    var totalQuantity = Array.from(quantityInputs).reduce(function (total, input) {
+const updateCartCount = () => {
+    const quantityInputs = document.querySelectorAll(".quantity-input");
+    const totalQuantity = Array.from(quantityInputs).reduce((total, input) => {
         return total + (parseInt(input.value) || 0);
     }, 0);
-    var cartCountElement = document.querySelector(".cart-count");
+    const cartCountElement = document.querySelector(".cart-count");
     if (cartCountElement) {
         cartCountElement.textContent = totalQuantity.toString();
     }
@@ -96,8 +97,8 @@ var updateCartCount = function () {
 /**
  * Loads cart data from localStorage and updates the UI.
  */
-var loadCartFromLocalStorage = function () {
-    var storedCart = localStorage.getItem("cart");
+const loadCartFromLocalStorage = () => {
+    const storedCart = localStorage.getItem("cart");
     if (storedCart) {
         try {
             cartData = JSON.parse(storedCart);
@@ -112,10 +113,10 @@ var loadCartFromLocalStorage = function () {
 };
 // Function to update the UI based on cart data
 function updateUIFromCartData() {
-    cartData.forEach(function (item) {
-        var productCard = document.querySelector(".product-card[data-id=\"".concat(item.id, "\"]"));
+    cartData.forEach((item) => {
+        const productCard = document.querySelector(`.product-card[data-id="${item.id}"]`);
         if (productCard) {
-            var quantityInput = productCard.querySelector(".quantity-input");
+            const quantityInput = productCard.querySelector(".quantity-input");
             if (quantityInput) {
                 quantityInput.value = item.quantity.toString(); // Update input with stored quantity
             }
@@ -127,8 +128,8 @@ function updateUIFromCartData() {
  * @param productId - The ID of the product
  * @param quantity - The quantity to add or update
  */
-var addToCart = function (productId, quantity) {
-    var index = cartData.findIndex(function (item) { return item.id === productId; });
+const addToCart = (productId, quantity) => {
+    const index = cartData.findIndex((item) => item.id === productId);
     if (index !== -1) {
         if (quantity > 0) {
             cartData[index].quantity = quantity;
@@ -138,7 +139,7 @@ var addToCart = function (productId, quantity) {
         }
     }
     else if (quantity > 0) {
-        cartData.push({ id: productId, quantity: quantity });
+        cartData.push({ id: productId, quantity });
     }
     saveCartToLocalStorage();
     updateCartCount();
@@ -146,7 +147,7 @@ var addToCart = function (productId, quantity) {
 /* *
  * Saves the current cart data to localStorage.
  */
-var saveCartToLocalStorage = function () {
+const saveCartToLocalStorage = () => {
     try {
         localStorage.setItem("cart", JSON.stringify(cartData));
     }
@@ -161,44 +162,69 @@ var saveCartToLocalStorage = function () {
  * @param product - The product data
  * @returns HTML string for the product card
  */
-var createProductCardHTML = function (product) {
-    return "\n    <div class=\"product-card\" data-id=\"".concat(product.id, "\">\n      <img src=\"").concat(product.image, "\" alt=\"").concat(product.name, "\">\n      <div class=\"product-info\">\n        <h3>").concat(product.name, "</h3>\n        <p class=\"product-sku\">SKU: ").concat(product.sku, "</p>\n        <p class=\"product-price\">$").concat(product.price, " <span>$").concat(product.originalPrice, "</span></p>\n        <p class=\"product-availability\">In Stock: <span class=\"availability-value\">").concat(product.availability, "</span></p>\n        <p class=\"product-description\">").concat(product.description, "</p>\n        <div class=\"product-tags\">\n          ").concat(product.tags
-        .map(function (tag) { return "<span class=\"tag\">".concat(tag, "</span>"); })
-        .join(""), "\n        </div>\n      </div>\n      <div class=\"related-products\">\n        <h4>You May Also Like</h4>\n        <ul>\n          ").concat(product.relatedProducts.map(function (item) { return "<li>".concat(item, "</li>"); }).join(""), "\n        </ul>\n      </div>\n      <div class=\"quantity-selector\">\n        <button class=\"quantity-btn minus\" data-id=\"").concat(product.id, "\">-</button>\n        <input type=\"number\" class=\"quantity-input\" value=\"1\" min=\"1\" max=\"").concat(product.availability, "\" data-id=\"").concat(product.id, "\">\n        <button class=\"quantity-btn plus\" data-id=\"").concat(product.id, "\">+</button>\n      </div>\n    </div>\n  ");
+const createProductCardHTML = (product) => {
+    return `
+    <div class="product-card" data-id="${product.id}">
+      <img src="${product.image}" alt="${product.name}">
+      <div class="product-info">
+        <h3>${product.name}</h3>
+        <p class="product-sku">SKU: ${product.sku}</p>
+        <p class="product-price">$${product.price} <span>$${product.originalPrice}</span></p>
+        <p class="product-availability">In Stock: <span class="availability-value">${product.availability}</span></p>
+        <p class="product-description">${product.description}</p>
+        <div class="product-tags">
+          ${product.tags
+        .map((tag) => `<span class="tag">${tag}</span>`)
+        .join("")}
+        </div>
+      </div>
+      <div class="related-products">
+        <h4>You May Also Like</h4>
+        <ul>
+          ${product.relatedProducts.map((item) => `<li>${item}</li>`).join("")}
+        </ul>
+      </div>
+      <div class="quantity-selector">
+        <button class="quantity-btn minus" data-id="${product.id}">-</button>
+        <input type="number" class="quantity-input" value="1" min="1" max="${product.availability}" data-id="${product.id}">
+        <button class="quantity-btn plus" data-id="${product.id}">+</button>
+      </div>
+    </div>
+  `;
 };
 /**
  * Sets up event listeners for a product card.
  * @param productCard - The product card element
  * @param product - The product data
  */
-var setupProductCardListeners = function (productCard, product) {
-    var plusButton = productCard.querySelector(".plus");
-    var minusButton = productCard.querySelector(".minus");
-    var quantityInput = productCard.querySelector(".quantity-input");
-    var availabilityElement = productCard.querySelector(".availability-value");
-    var availabilityStock = product.availability;
+const setupProductCardListeners = (productCard, product) => {
+    const plusButton = productCard.querySelector(".plus");
+    const minusButton = productCard.querySelector(".minus");
+    const quantityInput = productCard.querySelector(".quantity-input");
+    const availabilityElement = productCard.querySelector(".availability-value");
+    let availabilityStock = product.availability;
     if (plusButton && minusButton && quantityInput) {
-        plusButton.addEventListener("click", function () { return handleQuantityChange(1); });
-        minusButton.addEventListener("click", function () { return handleQuantityChange(-1); });
+        plusButton.addEventListener("click", () => handleQuantityChange(1));
+        minusButton.addEventListener("click", () => handleQuantityChange(-1));
         quantityInput.addEventListener("input", handleDirectInput);
         quantityInput.addEventListener("keydown", preventInvalidInput);
         // Initialize button states
-        var currentQuantity = parseInt(quantityInput.value) || 0;
+        const currentQuantity = parseInt(quantityInput.value) || 0;
         updateButtonsState(plusButton, minusButton, currentQuantity, availabilityStock);
     }
     function handleQuantityChange(change) {
         if (quantityInput) {
-            var currentQuantity = parseInt(quantityInput.value);
-            var newQuantity = Math.max(0, Math.min(currentQuantity + change, availabilityStock));
+            let currentQuantity = parseInt(quantityInput.value);
+            const newQuantity = Math.max(0, Math.min(currentQuantity + change, availabilityStock));
             quantityInput.value = newQuantity.toString();
-            var remainingStock = updateAvailability(availabilityElement, newQuantity, availabilityStock);
+            const remainingStock = updateAvailability(availabilityElement, newQuantity, availabilityStock);
             updateButtonsState(plusButton, minusButton, newQuantity, remainingStock);
             addToCart(product.id, newQuantity);
         }
     }
     function handleDirectInput() {
         if (quantityInput) {
-            var inputValue = parseInt(quantityInput.value);
+            let inputValue = parseInt(quantityInput.value);
             if (isNaN(inputValue) || inputValue < 0) {
                 inputValue = 0;
             }
@@ -223,24 +249,24 @@ var setupProductCardListeners = function (productCard, product) {
 /**
  * Initializes the product grid with all products.
  */
-var initializeProductGrid = function () {
-    var productGridElement = document.querySelector("#productGrid");
+const initializeProductGrid = () => {
+    const productGridElement = document.querySelector("#productGrid");
     if (productGridElement) {
-        var fragment_1 = document.createDocumentFragment();
-        products.forEach(function (product) {
-            var tempDiv = document.createElement("div");
+        const fragment = document.createDocumentFragment();
+        products.forEach((product) => {
+            const tempDiv = document.createElement("div");
             tempDiv.innerHTML = createProductCardHTML(product);
-            var productCard = tempDiv.firstElementChild;
+            const productCard = tempDiv.firstElementChild;
             if (productCard) {
                 setupProductCardListeners(productCard, product);
-                fragment_1.appendChild(productCard);
+                fragment.appendChild(productCard);
             }
         });
-        productGridElement.appendChild(fragment_1);
+        productGridElement.appendChild(fragment);
     }
 };
 // Initialize the application
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
     initializeProductGrid();
     loadCartFromLocalStorage();
 });
