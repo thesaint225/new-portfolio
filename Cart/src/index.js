@@ -53,7 +53,25 @@ const products = [
 ];
 // Use a more efficient data structure for products
 const productMap = new Map(products.map((product) => [product.id, product]));
-let cartData = [];
+/**
+ * Retrieves the cart data from localStorage.
+ * @returns The cart data or an empty array if no data is found.
+ */
+const getCartFromLocalStorage = () => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+        try {
+            return JSON.parse(storedCart); // Parse and return the cart data
+        }
+        catch (error) {
+            console.error("Error parsing cart data from localStorage:", error);
+            return []; // Return an empty array if parsing fails
+        }
+    }
+    return []; // Return an empty array if no data is found
+};
+let cartData = getCartFromLocalStorage(); // Global cart data array
+console.log(cartData);
 /**
  * Updates the state of quantity adjustment buttons based on current quantity and stock.
  * @param plusButton - The button to increase quantity
@@ -111,6 +129,23 @@ const loadCartFromLocalStorage = () => {
         }
     }
 };
+/**
+ * Saves product details to localStorage.
+ * @param product - The product data containing image, price, and name
+ */
+const saveProductToLocalStorage = (product) => {
+    try {
+        // Get existing products from localStorage or initialize an empty array
+        const existingProducts = JSON.parse(localStorage.getItem("savedProducts") || "[]");
+        // Add the new product to the array
+        existingProducts.push(product);
+        // Save the updated array back to localStorage
+        localStorage.setItem("savedProducts", JSON.stringify(existingProducts));
+    }
+    catch (error) {
+        console.error("Error saving product to localStorage:", error);
+    }
+};
 // Function to update the UI based on cart data
 function updateUIFromCartData() {
     cartData.forEach((item) => {
@@ -128,7 +163,7 @@ function updateUIFromCartData() {
  * @param productId - The ID of the product
  * @param quantity - The quantity to add or update
  */
-const addToCart = (productId, quantity) => {
+const addToCart = (productId, quantity, name, price, image) => {
     const index = cartData.findIndex((item) => item.id === productId);
     if (index !== -1) {
         if (quantity > 0) {
@@ -139,7 +174,9 @@ const addToCart = (productId, quantity) => {
         }
     }
     else if (quantity > 0) {
-        cartData.push({ id: productId, quantity });
+        cartData.push({ id: productId, quantity, name, price, image });
+        // Save the product details to localStorage when added
+        saveProductToLocalStorage({ image, price, name });
     }
     saveCartToLocalStorage();
     updateCartCount();
@@ -219,7 +256,7 @@ const setupProductCardListeners = (productCard, product) => {
             quantityInput.value = newQuantity.toString();
             const remainingStock = updateAvailability(availabilityElement, newQuantity, availabilityStock);
             updateButtonsState(plusButton, minusButton, newQuantity, remainingStock);
-            addToCart(product.id, newQuantity);
+            addToCart(product.id, newQuantity, product.name, product.price, product.image);
         }
     }
     function handleDirectInput() {
@@ -233,7 +270,7 @@ const setupProductCardListeners = (productCard, product) => {
             }
             quantityInput.value = inputValue.toString();
             updateAvailability(availabilityElement, inputValue, availabilityStock);
-            addToCart(product.id, inputValue);
+            addToCart(product.id, inputValue, product.name, product.price, product.image);
         }
     }
     function preventInvalidInput(e) {
