@@ -56,12 +56,24 @@ const renderCartItemsFromStorage = () => {
         return;
     }
     const cartItemContainer = document.querySelector(".cart-items");
-    if (!cartItemContainer) {
-        console.warn("Cart items container not found");
+    const subtotalElement = document.querySelector(".subtotal");
+    const discountElement = document.querySelector(".discount");
+    const totalElement = document.querySelector(".total");
+    const discountInput = document.querySelector(".discount-input");
+    const applyDiscountButton = document.querySelector(".apply-discount");
+    if (!cartItemContainer ||
+        !subtotalElement ||
+        !discountElement ||
+        !totalElement) {
+        console.warn("Cart items container or price elements not found");
         return;
     }
     // Clear existing items in cart
     cartItemContainer.innerHTML = "";
+    // calculate subtotal using reduce ()
+    const subtotal = cartData.reduce((acc, item) => {
+        return acc + item.price * item.quantity;
+    }, 0);
     cartData.forEach((item) => {
         const cartItemElement = document.createElement("div");
         cartItemElement.classList.add("cart-item");
@@ -104,6 +116,27 @@ const renderCartItemsFromStorage = () => {
         });
         cartItemContainer.appendChild(cartItemElement);
     });
+    // update subtotal in dom
+    subtotalElement.textContent = `Subtotal:$${subtotal.toFixed(2)}`;
+    // Initial discount in DOM
+    let discount = 0;
+    // Apply discount when discount button is clicked
+    applyDiscountButton === null || applyDiscountButton === void 0 ? void 0 : applyDiscountButton.addEventListener("click", () => {
+        const discountCode = discountInput.value.trim();
+        if (discountCode === "DISCOUNT10") {
+            // 10% discount
+            discount = subtotal * 0.1;
+        }
+        else {
+            discount = 0;
+            console.warn("Invalid discount code ");
+        }
+        // Update discount and total in the DOM
+        discountElement.textContent = `Discount: -$${discount.toFixed(2)}`;
+        totalElement.textContent = `Total: $${(subtotal - discount).toFixed(2)}`;
+    });
+    // Set initial total (without discount)
+    totalElement.textContent = `Total: $${(subtotal - discount).toFixed(2)}`;
 };
 // Call renderCartItemsFromStorage when the DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
