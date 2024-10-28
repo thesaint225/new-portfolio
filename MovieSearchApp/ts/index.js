@@ -55,7 +55,7 @@ var fetchMovies = function (searchTerm) { return __awaiter(_this, void 0, void 0
             case 2:
                 data = _a.sent();
                 console.log("movie Data:", data);
-                if (data.Search) {
+                if (data.Search && Array.isArray(data.Search)) {
                     renderMovies(data.Search); // Pass the array of movies to renderMovies
                 }
                 else {
@@ -88,43 +88,54 @@ if (searchInputElement && searchButtonElement) {
 }
 // Function to render movie data in html
 var moviesGrid = document.querySelector(".movies-grid");
+var createPosterElement = function (posterUrl, altText) {
+    var posterImg = document.createElement("img");
+    posterImg.src =
+        posterUrl !== "N/A" ? posterUrl : "/MovieSearchApp/assets/cinema-.jpg";
+    posterImg.alt = altText;
+    posterImg.classList.add("movie-poster");
+    return posterImg;
+};
+var createTitle = function (title) {
+    var movieTitle = document.createElement("h3");
+    movieTitle.classList.add("movie-details");
+    movieTitle.textContent = title;
+    return movieTitle;
+};
+var createDetailsElement = function (year) {
+    var movieDetails = document.createElement("p");
+    movieDetails.classList.add("movie-details");
+    movieDetails.textContent = year;
+    return movieDetails;
+};
+// combine the element to create a full movie card
+var createMovieCard = function (movie) {
+    var movieCard = document.createElement("div");
+    movieCard.classList.add("movie-card");
+    // create and append each part of the card
+    var posterImg = createPosterElement(movie.Poster, "".concat(movie.Title, " poster"));
+    var movieTitle = createTitle(movie.Title);
+    var movieDetails = createDetailsElement(movie.Year);
+    // Container for movie information
+    var movieInfo = document.createElement("div");
+    movieInfo.classList.add("movie-info");
+    movieInfo.appendChild(movieTitle);
+    movieInfo.appendChild(movieDetails);
+    // Append all element to main movie Card
+    movieCard.appendChild(posterImg);
+    movieCard.appendChild(movieInfo);
+    return movieCard;
+};
+// render the movie in the UI
 var renderMovies = function (movies) {
-    // Map over movies to create an array of movie card elements
-    var movieCards = movies.map(function (movie) {
-        var movieCard = document.createElement("div");
-        movieCard.classList.add("movie-card");
-        // Add poster
-        var posterImg = document.createElement("img");
-        posterImg.src =
-            movie.Poster !== "N/A"
-                ? movie.Poster
-                : "/MovieSearchApp/assets/cinema-.jpg";
-        posterImg.alt = "".concat(movie.Title, " Poster");
-        posterImg.classList.add("movie-poster");
-        // Add movie info container
-        var movieInfo = document.createElement("div");
-        movieInfo.classList.add("movie-info");
-        // Add title
-        var movieTitle = document.createElement("h3");
-        movieTitle.classList.add("movie-title");
-        movieTitle.textContent = movie.Title;
-        // Add details (release year and rating)
-        var movieDetails = document.createElement("p");
-        movieDetails.classList.add("movie-details");
-        movieDetails.textContent = "".concat(movie.Year);
-        // Append elements to their parents
-        movieInfo.appendChild(movieTitle);
-        movieInfo.appendChild(movieDetails);
-        movieCard.appendChild(posterImg);
-        movieCard.appendChild(movieInfo);
-        return movieCard; // Return the completed movie card
-    });
-    // Clear any previous movie cards
-    if (moviesGrid) {
-        moviesGrid.innerHTML = "";
+    var moviesGrid = document.querySelector(".movies-grid");
+    if (!moviesGrid) {
+        console.error("movie grid does not  exist ");
+        return;
     }
-    // Append all movie cards to the movies grid container
-    movieCards.forEach(function (card) {
-        moviesGrid === null || moviesGrid === void 0 ? void 0 : moviesGrid.appendChild(card);
-    });
+    // clear any previous content
+    moviesGrid.innerHTML = "";
+    // create a card for each movie and append grid
+    var movieCards = movies.map(createMovieCard);
+    movieCards.forEach(function (card) { return moviesGrid.appendChild(card); });
 };

@@ -1,3 +1,9 @@
+interface Movie {
+  Title: string;
+  Year: string;
+  Poster: string;
+}
+
 const searchInputElement: HTMLInputElement | null =
   document.querySelector(".search-input");
 
@@ -22,7 +28,7 @@ const fetchMovies = async (searchTerm: string) => {
     // parse JSON response
     const data = await res.json();
     console.log("movie Data:", data);
-    if (data.Search) {
+    if (data.Search && Array.isArray(data.Search)) {
       renderMovies(data.Search); // Pass the array of movies to renderMovies
     } else {
       alert("No movies found. Please try another search term.");
@@ -56,51 +62,73 @@ if (searchInputElement && searchButtonElement) {
 const moviesGrid: HTMLDivElement | null =
   document.querySelector(".movies-grid");
 
-const renderMovies = (movies: Array<any>) => {
-  // Map over movies to create an array of movie card elements
-  const movieCards = movies.map((movie) => {
-    const movieCard = document.createElement("div");
-    movieCard.classList.add("movie-card");
+const createPosterElement = (
+  posterUrl: string,
+  altText: string
+): HTMLImageElement => {
+  const posterImg = document.createElement("img");
+  posterImg.src =
+    posterUrl !== "N/A" ? posterUrl : "/MovieSearchApp/assets/cinema-.jpg";
+  posterImg.alt = altText;
+  posterImg.classList.add("movie-poster");
+  return posterImg;
+};
 
-    // Add poster
-    const posterImg = document.createElement("img");
-    posterImg.src =
-      movie.Poster !== "N/A"
-        ? movie.Poster
-        : "/MovieSearchApp/assets/cinema-.jpg";
-    posterImg.alt = `${movie.Title} Poster`;
-    posterImg.classList.add("movie-poster");
+const createTitle = (title: string): HTMLHeadingElement => {
+  const movieTitle = document.createElement("h3");
+  movieTitle.classList.add("movie-details");
+  movieTitle.textContent = title;
+  return movieTitle;
+};
 
-    // Add movie info container
-    const movieInfo = document.createElement("div");
-    movieInfo.classList.add("movie-info");
+const createDetailsElement = (year: string): HTMLParagraphElement => {
+  const movieDetails = document.createElement("p");
+  movieDetails.classList.add("movie-details");
+  movieDetails.textContent = year;
 
-    // Add title
-    const movieTitle = document.createElement("h3");
-    movieTitle.classList.add("movie-title");
-    movieTitle.textContent = movie.Title;
+  return movieDetails;
+};
 
-    // Add details (release year and rating)
-    const movieDetails = document.createElement("p");
-    movieDetails.classList.add("movie-details");
-    movieDetails.textContent = `${movie.Year}`;
+// combine the element to create a full movie card
 
-    // Append elements to their parents
-    movieInfo.appendChild(movieTitle);
-    movieInfo.appendChild(movieDetails);
-    movieCard.appendChild(posterImg);
-    movieCard.appendChild(movieInfo);
+const createMovieCard = (movie: Movie): HTMLDivElement => {
+  const movieCard = document.createElement("div");
+  movieCard.classList.add("movie-card");
 
-    return movieCard; // Return the completed movie card
-  });
+  // create and append each part of the card
 
-  // Clear any previous movie cards
-  if (moviesGrid) {
-    moviesGrid.innerHTML = "";
+  const posterImg = createPosterElement(movie.Poster, `${movie.Title} poster`);
+  const movieTitle = createTitle(movie.Title);
+  const movieDetails = createDetailsElement(movie.Year);
+
+  // Container for movie information
+
+  const movieInfo = document.createElement("div");
+  movieInfo.classList.add("movie-info");
+  movieInfo.appendChild(movieTitle);
+  movieInfo.appendChild(movieDetails);
+
+  // Append all element to main movie Card
+  movieCard.appendChild(posterImg);
+  movieCard.appendChild(movieInfo);
+
+  return movieCard;
+};
+
+// render the movie in the UI
+
+const renderMovies = (movies: Movie[]): void => {
+  const moviesGrid = document.querySelector(".movies-grid");
+  if (!moviesGrid) {
+    console.error("movie grid does not  exist ");
+    return;
   }
 
-  // Append all movie cards to the movies grid container
-  movieCards.forEach((card) => {
-    moviesGrid?.appendChild(card);
-  });
+  // clear any previous content
+
+  moviesGrid.innerHTML = "";
+
+  // create a card for each movie and append grid
+  const movieCards = movies.map(createMovieCard);
+  movieCards.forEach((card) => moviesGrid.appendChild(card));
 };
