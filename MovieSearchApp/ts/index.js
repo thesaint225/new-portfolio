@@ -35,8 +35,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
-var searchInputElement = document.querySelector(".search-input");
-var searchButtonElement = document.querySelector(".search-button");
+var SELECTORS = {
+    SEARCH_INPUT: ".search-input",
+    SEARCH_BUTTON: ".search-button",
+    MOVIES_GRID: ".movies-grid",
+};
+var DEFAULT_POSTER = "/MovieSearchApp/assets/cinema-.jpg";
+// Use the constants in your code
+var searchInputElement = document.querySelector(SELECTORS.SEARCH_INPUT);
+var searchButtonElement = document.querySelector(SELECTORS.SEARCH_BUTTON);
 //   Define function that will take movie data
 var fetchMovies = function (searchTerm) { return __awaiter(_this, void 0, void 0, function () {
     var res, data, error_1;
@@ -87,11 +94,10 @@ if (searchInputElement && searchButtonElement) {
     });
 }
 // Function to render movie data in html
-var moviesGrid = document.querySelector(".movies-grid");
+var moviesGrid = document.querySelector(SELECTORS.MOVIES_GRID);
 var createPosterElement = function (posterUrl, altText) {
     var posterImg = document.createElement("img");
-    posterImg.src =
-        posterUrl !== "N/A" ? posterUrl : "/MovieSearchApp/assets/cinema-.jpg";
+    posterImg.src = posterUrl !== "N/A" ? posterUrl : DEFAULT_POSTER;
     posterImg.alt = altText;
     posterImg.classList.add("movie-poster");
     return posterImg;
