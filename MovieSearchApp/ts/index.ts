@@ -6,7 +6,7 @@ interface Movie {
 
 const SELECTORS = {
   SEARCH_INPUT: ".search-input",
-  SEARCH_BUTTON: ".search-button",
+  // SEARCH_BUTTON: ".search-button",
   MOVIES_GRID: ".movies-grid",
 } as const;
 
@@ -21,6 +21,27 @@ const searchInputElement: HTMLInputElement | null = document.querySelector(
 const searchButtonElement: HTMLButtonElement | null = document.querySelector(
   SELECTORS.SEARCH_BUTTON
 );
+
+// const debounce = (func, delay) => {
+//   let timeoutId;
+//   return (...arg) => {
+//     clearTimeout(timeoutId);
+//     timeoutId = setTimeout(()=>func.apply(this,args),delay)
+//   };
+// };
+
+const debounce = <T extends (...args: any[]) => void>(
+  // type T is any function  that takes any arguments and returns void
+  func: T,
+  // delay should be number
+  delay: number
+): ((...args: Parameters<T>) => void) => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
 //   Define function that will take movie data
 
@@ -50,21 +71,16 @@ const fetchMovies = async (searchTerm: string) => {
   }
 };
 
-//  checks that  Elements exist and add  event listener
+// wrap fetchMovies in debounce
 
-if (searchInputElement && searchButtonElement) {
-  searchButtonElement.addEventListener("click", () => {
-    // Capture and trim input value
+const debouncedFetchMovies = debounce(fetchMovies, 2000);
+
+// Use debouncedFetchMovies in your event listener
+if (searchInputElement) {
+  searchInputElement.addEventListener("input", () => {
     const searchTerm: string = searchInputElement.value.trim();
-
-    // Check if input is not empty
     if (searchTerm) {
-      console.log(`Searching for:${searchTerm} `);
-
-      // Call fetchMovies functions with searchTerm
-      fetchMovies(searchTerm);
-    } else {
-      alert("Please enter a movie name to search.");
+      debouncedFetchMovies(searchTerm);
     }
   });
 }

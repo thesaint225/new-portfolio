@@ -37,13 +37,35 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _this = this;
 var SELECTORS = {
     SEARCH_INPUT: ".search-input",
-    SEARCH_BUTTON: ".search-button",
+    // SEARCH_BUTTON: ".search-button",
     MOVIES_GRID: ".movies-grid",
 };
 var DEFAULT_POSTER = "/MovieSearchApp/assets/cinema-.jpg";
 // Use the constants in your code
 var searchInputElement = document.querySelector(SELECTORS.SEARCH_INPUT);
 var searchButtonElement = document.querySelector(SELECTORS.SEARCH_BUTTON);
+// const debounce = (func, delay) => {
+//   let timeoutId;
+//   return (...arg) => {
+//     clearTimeout(timeoutId);
+//     timeoutId = setTimeout(()=>func.apply(this,args),delay)
+//   };
+// };
+var debounce = function (
+// type T is any function  that takes any arguments and returns void
+func, 
+// delay should be number
+delay) {
+    var timeoutId;
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(function () { return func.apply(void 0, args); }, delay);
+    };
+};
 //   Define function that will take movie data
 var fetchMovies = function (searchTerm) { return __awaiter(_this, void 0, void 0, function () {
     var res, data, error_1;
@@ -77,19 +99,14 @@ var fetchMovies = function (searchTerm) { return __awaiter(_this, void 0, void 0
         }
     });
 }); };
-//  checks that  Elements exist and add  event listener
-if (searchInputElement && searchButtonElement) {
-    searchButtonElement.addEventListener("click", function () {
-        // Capture and trim input value
+// wrap fetchMovies in debounce
+var debouncedFetchMovies = debounce(fetchMovies, 2000);
+// Use debouncedFetchMovies in your event listener
+if (searchInputElement) {
+    searchInputElement.addEventListener("input", function () {
         var searchTerm = searchInputElement.value.trim();
-        // Check if input is not empty
         if (searchTerm) {
-            console.log("Searching for:".concat(searchTerm, " "));
-            // Call fetchMovies functions with searchTerm
-            fetchMovies(searchTerm);
-        }
-        else {
-            alert("Please enter a movie name to search.");
+            debouncedFetchMovies(searchTerm);
         }
     });
 }
