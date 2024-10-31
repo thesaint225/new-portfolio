@@ -6,7 +6,7 @@ interface Movie {
 
 const SELECTORS = {
   SEARCH_INPUT: ".search-input",
-  // SEARCH_BUTTON: ".search-button",
+  SEARCH_BUTTON: ".search-button",
   MOVIES_GRID: ".movies-grid",
 } as const;
 
@@ -157,6 +157,9 @@ const renderMovies = (movies: Movie[]): void => {
   moviesGrid.innerHTML = "";
 
   // create a card for each movie and append grid
+  const fragment = document.createDocumentFragment();
   const movieCards = movies.map(createMovieCard);
-  movieCards.forEach((card) => moviesGrid.appendChild(card));
+  movieCards.forEach((card) => fragment.appendChild(card));
+
+  moviesGrid.appendChild(fragment);
 };

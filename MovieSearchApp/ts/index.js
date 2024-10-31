@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _this = this;
 var SELECTORS = {
     SEARCH_INPUT: ".search-input",
-    // SEARCH_BUTTON: ".search-button",
+    SEARCH_BUTTON: ".search-button",
     MOVIES_GRID: ".movies-grid",
 };
 var DEFAULT_POSTER = "/MovieSearchApp/assets/cinema-.jpg";
@@ -159,6 +159,8 @@ var renderMovies = function (movies) {
     // clear any previous content
     moviesGrid.innerHTML = "";
     // create a card for each movie and append grid
+    var fragment = document.createDocumentFragment();
     var movieCards = movies.map(createMovieCard);
-    movieCards.forEach(function (card) { return moviesGrid.appendChild(card); });
+    movieCards.forEach(function (card) { return fragment.appendChild(card); });
+    moviesGrid.appendChild(fragment);
 };
