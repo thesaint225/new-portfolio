@@ -8,6 +8,7 @@ const SELECTORS = {
   SEARCH_INPUT: ".search-input",
   SEARCH_BUTTON: ".search-button",
   MOVIES_GRID: ".movies-grid",
+  MESSAGE_CONTAINER: ".message-container",
 } as const;
 
 const DEFAULT_POSTER = "/MovieSearchApp/assets/cinema-.jpg";
@@ -22,13 +23,9 @@ const searchButtonElement: HTMLButtonElement | null = document.querySelector(
   SELECTORS.SEARCH_BUTTON
 );
 
-// const debounce = (func, delay) => {
-//   let timeoutId;
-//   return (...arg) => {
-//     clearTimeout(timeoutId);
-//     timeoutId = setTimeout(()=>func.apply(this,args),delay)
-//   };
-// };
+const messageContainer: HTMLDivElement | null = document.querySelector(
+  SELECTORS.MESSAGE_CONTAINER
+);
 
 const debounce = <T extends (...args: any[]) => void>(
   // type T is any function  that takes any arguments and returns void
@@ -41,6 +38,35 @@ const debounce = <T extends (...args: any[]) => void>(
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func(...args), delay);
   };
+};
+
+// display a message in the ui
+
+const displayMessage = (message: string) => {
+  if (messageContainer) {
+    messageContainer.textContent = message;
+    messageContainer.style.display = "block";
+  }
+};
+
+//  clear message from ui
+
+const clearMessage = () => {
+  if (messageContainer) {
+    messageContainer.textContent = "";
+    messageContainer.style.display = "none";
+  }
+
+  // clear the search  input
+  if (searchInputElement) {
+    searchInputElement.value = "";
+  }
+};
+
+const clearInput = () => {
+  if (searchInputElement) {
+    searchInputElement.value = "";
+  }
 };
 
 //   Define function that will take movie data
@@ -61,13 +87,16 @@ const fetchMovies = async (searchTerm: string) => {
     // parse JSON response
     const data = await res.json();
     console.log("movie Data:", data);
+    clearMessage();
     if (data.Search && Array.isArray(data.Search)) {
       renderMovies(data.Search); // Pass the array of movies to renderMovies
     } else {
-      alert("No movies found. Please try another search term.");
+      displayMessage("no movies found .Please try another search term.");
     }
   } catch (error) {
     console.error("Error fetching movies:", error);
+    displayMessage("An error occurred.please try again later");
+    clearInput();
   }
 };
 

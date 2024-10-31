@@ -39,18 +39,13 @@ var SELECTORS = {
     SEARCH_INPUT: ".search-input",
     SEARCH_BUTTON: ".search-button",
     MOVIES_GRID: ".movies-grid",
+    MESSAGE_CONTAINER: ".message-container",
 };
 var DEFAULT_POSTER = "/MovieSearchApp/assets/cinema-.jpg";
 // Use the constants in your code
 var searchInputElement = document.querySelector(SELECTORS.SEARCH_INPUT);
 var searchButtonElement = document.querySelector(SELECTORS.SEARCH_BUTTON);
-// const debounce = (func, delay) => {
-//   let timeoutId;
-//   return (...arg) => {
-//     clearTimeout(timeoutId);
-//     timeoutId = setTimeout(()=>func.apply(this,args),delay)
-//   };
-// };
+var messageContainer = document.querySelector(SELECTORS.MESSAGE_CONTAINER);
 var debounce = function (
 // type T is any function  that takes any arguments and returns void
 func, 
@@ -65,6 +60,29 @@ delay) {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(function () { return func.apply(void 0, args); }, delay);
     };
+};
+// display a message in the ui
+var displayMessage = function (message) {
+    if (messageContainer) {
+        messageContainer.textContent = message;
+        messageContainer.style.display = "block";
+    }
+};
+//  clear message from ui
+var clearMessage = function () {
+    if (messageContainer) {
+        messageContainer.textContent = "";
+        messageContainer.style.display = "none";
+    }
+    // clear the search  input
+    if (searchInputElement) {
+        searchInputElement.value = "";
+    }
+};
+var clearInput = function () {
+    if (searchInputElement) {
+        searchInputElement.value = "";
+    }
 };
 //   Define function that will take movie data
 var fetchMovies = function (searchTerm) { return __awaiter(_this, void 0, void 0, function () {
@@ -84,16 +102,19 @@ var fetchMovies = function (searchTerm) { return __awaiter(_this, void 0, void 0
             case 2:
                 data = _a.sent();
                 console.log("movie Data:", data);
+                clearMessage();
                 if (data.Search && Array.isArray(data.Search)) {
                     renderMovies(data.Search); // Pass the array of movies to renderMovies
                 }
                 else {
-                    alert("No movies found. Please try another search term.");
+                    displayMessage("no movies found .Please try another search term.");
                 }
                 return [3 /*break*/, 4];
             case 3:
                 error_1 = _a.sent();
                 console.error("Error fetching movies:", error_1);
+                displayMessage("An error occurred.please try again later");
+                clearInput();
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
         }

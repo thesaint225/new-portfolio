@@ -25,6 +25,16 @@ body {
   margin: 0 auto;
   padding: 2rem;
 }
+.message-container {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  background-color: #f8d7da; /* Light red for errors */
+  color: #721c24; /* Dark red text */
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  font-size: 1rem;
+  text-align: center;
+}
 
 header {
   text-align: center;
