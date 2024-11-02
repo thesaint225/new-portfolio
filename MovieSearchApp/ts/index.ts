@@ -100,6 +100,28 @@ const fetchMovies = async (searchTerm: string) => {
   }
 };
 
+const fetchMoviesDetails = async (title: string) => {
+  try {
+    const res = await fetch(
+      `http://www.omdbapi.com/?t=${encodeURIComponent(
+        title
+      )}&plot=full&apiKey=b9a4d057`
+    );
+
+    // ensure response is ok before proceeding
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status:${res.status}`);
+    }
+
+    // parse json response
+    const data = await res.json();
+    console.log("Movie Details:", data);
+  } catch (error) {
+    console.error("Error fetching movie details", error);
+  }
+};
+
 // wrap fetchMovies in debounce
 
 const debouncedFetchMovies = debounce(fetchMovies, 2000);
@@ -157,6 +179,12 @@ const createMovieCard = (movie: Movie): HTMLDivElement => {
   const posterImg = createPosterElement(movie.Poster, `${movie.Title} poster`);
   const movieTitle = createTitle(movie.Title);
   const movieDetails = createDetailsElement(movie.Year);
+
+  // Add event listener to movie title
+  movieTitle.addEventListener("click", () => {
+    // fetch and display additional details when title is clicked
+    fetchMoviesDetails(movie.Title);
+  });
 
   // Container for movie information
 

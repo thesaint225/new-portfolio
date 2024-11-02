@@ -120,6 +120,32 @@ var fetchMovies = function (searchTerm) { return __awaiter(_this, void 0, void 0
         }
     });
 }); };
+var fetchMoviesDetails = function (title) { return __awaiter(_this, void 0, void 0, function () {
+    var res, data, error_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, , 4]);
+                return [4 /*yield*/, fetch("http://www.omdbapi.com/?t=".concat(encodeURIComponent(title), "&plot=full&apiKey=b9a4d057"))];
+            case 1:
+                res = _a.sent();
+                // ensure response is ok before proceeding
+                if (!res.ok) {
+                    throw new Error("HTTP error! Status:".concat(res.status));
+                }
+                return [4 /*yield*/, res.json()];
+            case 2:
+                data = _a.sent();
+                console.log("Movie Details:", data);
+                return [3 /*break*/, 4];
+            case 3:
+                error_2 = _a.sent();
+                console.error("Error fetching movie details", error_2);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
 // wrap fetchMovies in debounce
 var debouncedFetchMovies = debounce(fetchMovies, 2000);
 // Use debouncedFetchMovies in your event listener
@@ -160,6 +186,11 @@ var createMovieCard = function (movie) {
     var posterImg = createPosterElement(movie.Poster, "".concat(movie.Title, " poster"));
     var movieTitle = createTitle(movie.Title);
     var movieDetails = createDetailsElement(movie.Year);
+    // Add event listener to movie title
+    movieTitle.addEventListener("click", function () {
+        // fetch and display additional details when title is clicked
+        fetchMoviesDetails(movie.Title);
+    });
     // Container for movie information
     var movieInfo = document.createElement("div");
     movieInfo.classList.add("movie-info");
