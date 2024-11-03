@@ -157,6 +157,7 @@ const createTitle = (title: string): HTMLHeadingElement => {
   const movieTitle = document.createElement("h3");
   movieTitle.classList.add("movie-details");
   movieTitle.textContent = title;
+  movieTitle.classList.add("movie-title");
   return movieTitle;
 };
 

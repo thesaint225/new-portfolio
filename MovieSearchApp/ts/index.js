@@ -170,6 +170,7 @@ var createTitle = function (title) {
     var movieTitle = document.createElement("h3");
     movieTitle.classList.add("movie-details");
     movieTitle.textContent = title;
+    movieTitle.classList.add("movie-title");
     return movieTitle;
 };
 var createDetailsElement = function (year) {
