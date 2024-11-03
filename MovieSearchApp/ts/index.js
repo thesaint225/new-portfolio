@@ -120,12 +120,74 @@ var fetchMovies = function (searchTerm) { return __awaiter(_this, void 0, void 0
         }
     });
 }); };
+// Function to create the modal
+var createMovieModal = function (movie) {
+    console.log("Function called:creating modal");
+    // Create modal container element
+    var modal = document.createElement("div");
+    modal.classList.add("modal");
+    // Modal content template
+    var modalContent = "\n    <div class=\"modal-content\">\n      <span class=\"close-button\">&times;</span>\n      <div class=\"modal-header\">\n        <div class=\"modal-poster-container\">\n          <img src=\"".concat(movie.Poster !== "N/A" ? movie.Poster : DEFAULT_POSTER, "\" \n               alt=\"").concat(movie.Title, " Poster\" \n               class=\"modal-poster\">\n        </div>\n        <div class=\"modal-title-section\">\n          <h2>").concat(movie.Title, "</h2>\n          <div class=\"modal-meta\">\n            <span class=\"badge\">").concat(movie.Year, "</span>\n            <span class=\"badge\">").concat(movie.Runtime, "</span>\n            <span class=\"badge\">").concat(movie.Rated, "</span>\n          </div>\n          <div class=\"modal-ratings\">\n            <div class=\"rating-item\">\n              <span class=\"rating-label\">IMDb</span>\n              <span class=\"rating-value\">\u2B50 ").concat(movie.imdbRating, "/10</span>\n            </div>\n            ").concat(movie.Metascore !== "N/A"
+        ? "\n              <div class=\"rating-item\">\n                <span class=\"rating-label\">Metascore</span>\n                <span class=\"rating-value\">".concat(movie.Metascore, "/100</span>\n              </div>\n            ")
+        : "", "\n          </div>\n        </div>\n      </div>\n      <div class=\"modal-body\">\n        <div class=\"plot-section\">\n          <h3>Plot</h3>\n          <p>").concat(movie.Plot, "</p>\n        </div>\n        <div class=\"details-grid\">\n          <div class=\"detail-item\">\n            <h4>Genre</h4>\n            <p>").concat(movie.Genre.split(", ")
+        .map(function (genre) { return "<span class=\"genre-tag\">".concat(genre, "</span>"); })
+        .join(""), "</p>\n          </div>\n          <div class=\"detail-item\">\n            <h4>Cast</h4>\n            <p>").concat(movie.Actors, "</p>\n          </div>\n          <div class=\"detail-item\">\n            <h4>Director</h4>\n            <p>").concat(movie.Director !== "N/A" ? movie.Director : "Not Available", "</p>\n          </div>\n          <div class=\"detail-item\">\n            <h4>Writer</h4>\n            <p>").concat(movie.Writer !== "N/A" ? movie.Writer : "Not Available", "</p>\n          </div>\n          <div class=\"detail-item\">\n            <h4>Awards</h4>\n            <p>").concat(movie.Awards !== "N/A" ? movie.Awards : "No awards yet", "</p>\n          </div>\n          <div class=\"detail-item\">\n            <h4>Release Date</h4>\n            <p>").concat(movie.Released, "</p>\n          </div>\n          ").concat(movie.totalSeasons
+        ? "\n            <div class=\"detail-item\">\n              <h4>Seasons</h4>\n              <p>".concat(movie.totalSeasons, "</p>\n            </div>\n          ")
+        : "", "\n          <div class=\"detail-item\">\n            <h4>Language</h4>\n            <p>").concat(movie.Language, "</p>\n          </div>\n          <div class=\"detail-item\">\n            <h4>Country</h4>\n            <p>").concat(movie.Country, "</p>\n          </div>\n        </div>\n      </div>\n    </div>\n  ");
+    // Insert content into modal
+    modal.innerHTML = modalContent;
+    // Type-safe access to close button
+    var closeButton = modal.querySelector(".close-button");
+    closeButton === null || closeButton === void 0 ? void 0 : closeButton.addEventListener("click", function () { return closeMovieModal(modal); });
+    // Close modal when clicking outside of it
+    modal.addEventListener("click", function (e) {
+        if (e.target === modal)
+            closeMovieModal(modal);
+    });
+    // Append modal to the document body
+    document.body.appendChild(modal);
+    // Force a reflow before adding the show-modal class
+    modal.offsetHeight; // This triggers a reflow
+    // Show modal with animation
+    requestAnimationFrame(function () {
+        modal.classList.add("show-modal");
+    });
+    return modal; // Return for further use if necessary
+};
+var closeMovieModal = function (modal) {
+    modal.classList.remove("show-modal");
+    modal.addEventListener("transitionend", function () {
+        modal.remove();
+    }, { once: true });
+};
 var fetchMoviesDetails = function (title) { return __awaiter(_this, void 0, void 0, function () {
-    var res, data, error_2;
+    var loadingModal, res, data, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 3, , 4]);
+                loadingModal = createMovieModal({
+                    Title: "Loading...",
+                    Year: "",
+                    Rated: "",
+                    Released: "",
+                    Runtime: "",
+                    Genre: "",
+                    Director: "",
+                    Writer: "",
+                    Actors: "",
+                    Plot: "Loading movie details...",
+                    Language: "",
+                    Country: "",
+                    Awards: "",
+                    Poster: DEFAULT_POSTER,
+                    Ratings: [],
+                    Metascore: "",
+                    imdbRating: "",
+                    imdbVotes: "",
+                    imdbID: "",
+                    Type: "",
+                });
                 return [4 /*yield*/, fetch("http://www.omdbapi.com/?t=".concat(encodeURIComponent(title), "&plot=full&apiKey=b9a4d057"))];
             case 1:
                 res = _a.sent();
@@ -136,11 +198,38 @@ var fetchMoviesDetails = function (title) { return __awaiter(_this, void 0, void
                 return [4 /*yield*/, res.json()];
             case 2:
                 data = _a.sent();
+                // Remove loading modal
+                closeMovieModal(loadingModal);
                 console.log("Movie Details:", data);
+                createMovieModal(data);
                 return [3 /*break*/, 4];
             case 3:
                 error_2 = _a.sent();
                 console.error("Error fetching movie details", error_2);
+                // Show error message in modal
+                createMovieModal({
+                    Title: "Error",
+                    Plot: "Failed to load movie details: ".concat(error_2 instanceof Error ? error_2.message : "Unknown error"),
+                    // Fill in other required fields with empty strings
+                    Year: "",
+                    Rated: "",
+                    Released: "",
+                    Runtime: "",
+                    Genre: "",
+                    Director: "",
+                    Writer: "",
+                    Actors: "",
+                    Language: "",
+                    Country: "",
+                    Awards: "",
+                    Poster: DEFAULT_POSTER,
+                    Ratings: [],
+                    Metascore: "",
+                    imdbRating: "",
+                    imdbVotes: "",
+                    imdbID: "",
+                    Type: "",
+                });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
         }

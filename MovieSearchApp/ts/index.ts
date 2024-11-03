@@ -1,7 +1,25 @@
 interface Movie {
   Title: string;
   Year: string;
+  Rated: string;
+  Released: string;
+  Runtime: string;
+  Genre: string;
+  Director: string;
+  Writer: string;
+  Actors: string;
+  Plot: string;
+  Language: string;
+  Country: string;
+  Awards: string;
   Poster: string;
+  Ratings: Array<{ Source: string; Value: string }>;
+  Metascore: string;
+  imdbRating: string;
+  imdbVotes: string;
+  imdbID: string;
+  Type: string;
+  totalSeasons?: string;
 }
 
 const SELECTORS = {
@@ -100,8 +118,170 @@ const fetchMovies = async (searchTerm: string) => {
   }
 };
 
+// Function to create the modal
+const createMovieModal = (movie: Movie): HTMLDivElement => {
+  console.log("Function called:creating modal");
+  // Create modal container element
+  const modal: HTMLDivElement = document.createElement("div");
+  modal.classList.add("modal");
+
+  // Modal content template
+  const modalContent: string = `
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <div class="modal-header">
+        <div class="modal-poster-container">
+          <img src="${movie.Poster !== "N/A" ? movie.Poster : DEFAULT_POSTER}" 
+               alt="${movie.Title} Poster" 
+               class="modal-poster">
+        </div>
+        <div class="modal-title-section">
+          <h2>${movie.Title}</h2>
+          <div class="modal-meta">
+            <span class="badge">${movie.Year}</span>
+            <span class="badge">${movie.Runtime}</span>
+            <span class="badge">${movie.Rated}</span>
+          </div>
+          <div class="modal-ratings">
+            <div class="rating-item">
+              <span class="rating-label">IMDb</span>
+              <span class="rating-value">⭐ ${movie.imdbRating}/10</span>
+            </div>
+            ${
+              movie.Metascore !== "N/A"
+                ? `
+              <div class="rating-item">
+                <span class="rating-label">Metascore</span>
+                <span class="rating-value">${movie.Metascore}/100</span>
+              </div>
+            `
+                : ""
+            }
+          </div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="plot-section">
+          <h3>Plot</h3>
+          <p>${movie.Plot}</p>
+        </div>
+        <div class="details-grid">
+          <div class="detail-item">
+            <h4>Genre</h4>
+            <p>${movie.Genre.split(", ")
+              .map((genre) => `<span class="genre-tag">${genre}</span>`)
+              .join("")}</p>
+          </div>
+          <div class="detail-item">
+            <h4>Cast</h4>
+            <p>${movie.Actors}</p>
+          </div>
+          <div class="detail-item">
+            <h4>Director</h4>
+            <p>${
+              movie.Director !== "N/A" ? movie.Director : "Not Available"
+            }</p>
+          </div>
+          <div class="detail-item">
+            <h4>Writer</h4>
+            <p>${movie.Writer !== "N/A" ? movie.Writer : "Not Available"}</p>
+          </div>
+          <div class="detail-item">
+            <h4>Awards</h4>
+            <p>${movie.Awards !== "N/A" ? movie.Awards : "No awards yet"}</p>
+          </div>
+          <div class="detail-item">
+            <h4>Release Date</h4>
+            <p>${movie.Released}</p>
+          </div>
+          ${
+            movie.totalSeasons
+              ? `
+            <div class="detail-item">
+              <h4>Seasons</h4>
+              <p>${movie.totalSeasons}</p>
+            </div>
+          `
+              : ""
+          }
+          <div class="detail-item">
+            <h4>Language</h4>
+            <p>${movie.Language}</p>
+          </div>
+          <div class="detail-item">
+            <h4>Country</h4>
+            <p>${movie.Country}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Insert content into modal
+  modal.innerHTML = modalContent;
+
+  // Type-safe access to close button
+  const closeButton = modal.querySelector(
+    ".close-button"
+  ) as HTMLSpanElement | null;
+  closeButton?.addEventListener("click", () => closeMovieModal(modal));
+
+  // Close modal when clicking outside of it
+  modal.addEventListener("click", (e: MouseEvent) => {
+    if (e.target === modal) closeMovieModal(modal);
+  });
+
+  // Append modal to the document body
+  document.body.appendChild(modal);
+
+  // Force a reflow before adding the show-modal class
+  modal.offsetHeight; // This triggers a reflow
+
+  // Show modal with animation
+  requestAnimationFrame(() => {
+    modal.classList.add("show-modal");
+  });
+
+  return modal; // Return for further use if necessary
+};
+
+const closeMovieModal = (modal: HTMLDivElement): void => {
+  modal.classList.remove("show-modal");
+  modal.addEventListener(
+    "transitionend",
+    () => {
+      modal.remove();
+    },
+    { once: true }
+  );
+};
+
 const fetchMoviesDetails = async (title: string) => {
   try {
+    // Show loading state
+    const loadingModal = createMovieModal({
+      Title: "Loading...",
+      Year: "",
+      Rated: "",
+      Released: "",
+      Runtime: "",
+      Genre: "",
+      Director: "",
+      Writer: "",
+      Actors: "",
+      Plot: "Loading movie details...",
+      Language: "",
+      Country: "",
+      Awards: "",
+      Poster: DEFAULT_POSTER,
+      Ratings: [],
+      Metascore: "",
+      imdbRating: "",
+      imdbVotes: "",
+      imdbID: "",
+      Type: "",
+    });
+
     const res = await fetch(
       `http://www.omdbapi.com/?t=${encodeURIComponent(
         title
@@ -116,9 +296,38 @@ const fetchMoviesDetails = async (title: string) => {
 
     // parse json response
     const data = await res.json();
+    // Remove loading modal
+    closeMovieModal(loadingModal);
     console.log("Movie Details:", data);
+    createMovieModal(data);
   } catch (error) {
     console.error("Error fetching movie details", error);
+    // Show error message in modal
+    createMovieModal({
+      Title: "Error",
+      Plot: `Failed to load movie details: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+      // Fill in other required fields with empty strings
+      Year: "",
+      Rated: "",
+      Released: "",
+      Runtime: "",
+      Genre: "",
+      Director: "",
+      Writer: "",
+      Actors: "",
+      Language: "",
+      Country: "",
+      Awards: "",
+      Poster: DEFAULT_POSTER,
+      Ratings: [],
+      Metascore: "",
+      imdbRating: "",
+      imdbVotes: "",
+      imdbID: "",
+      Type: "",
+    });
   }
 };
 
